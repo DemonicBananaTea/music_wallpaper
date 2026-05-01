@@ -3,8 +3,12 @@ package com.example.musicwallpaper
 import android.content.Context
 import android.graphics.Bitmap
 import android.view.SurfaceHolder
-import javax.microedition.khronos.egl.*
 import android.opengl.*
+import android.opengl.EGL14
+import android.opengl.EGLConfig
+import android.opengl.EGLContext
+import android.opengl.EGLDisplay
+import android.opengl.EGLSurface
 
 class GLRenderer(
     private val holder: SurfaceHolder,
