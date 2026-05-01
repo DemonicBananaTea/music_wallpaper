@@ -14,10 +14,12 @@ class MediaSessionReader(private val context: Context) {
     private val component =
         ComponentName(context, DummyNotificationListener::class.java)
 
-    private val allowedApps = setOf(
-        "com.spotify.music"
-    
-)
+    val allowedApps = Settings.getAllowedApps(context)
+
+if (allowedApps.isNotEmpty() && !allowedApps.contains(packageName)) {
+    ArtworkStore.bitmap = null
+    return
+}
    fun update() {
     try {
         val sessions = manager.getActiveSessions(component)
