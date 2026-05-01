@@ -14,13 +14,21 @@ class MainWallpaperService : WallpaperService() {
         private val handler = Handler(Looper.getMainLooper())
         private var running = false
 
+        private lateinit var reader: MediaSessionReader
+
         private val frame = object : Runnable {
             override fun run() {
                 if (running) {
-                    drawSafe()
-                    handler.postDelayed(this, 16)
+                    reader.update()
+                    draw()
+                    handler.postDelayed(this, 1000) // 1 сек — достатньо
                 }
             }
+        }
+
+        override fun onCreate(holder: SurfaceHolder) {
+            super.onCreate(holder)
+            reader = MediaSessionReader(applicationContext)
         }
 
         override fun onVisibilityChanged(visible: Boolean) {
@@ -29,28 +37,19 @@ class MainWallpaperService : WallpaperService() {
             else handler.removeCallbacks(frame)
         }
 
-        private fun drawSafe() {
-            val holder = surfaceHolder
-            if (!holder.surface.isValid) return
-
-            val canvas = holder.lockCanvas() ?: return
+        private fun draw() {
+            val canvas = surfaceHolder.lockCanvas() ?: return
 
             try {
                 canvas.drawColor(Color.BLACK)
 
-                val bmp = ArtworkStore.get()
-
-                if (bmp != null) {
+                ArtworkStore.bitmap?.let { bmp ->
                     val dst = Rect(0, 0, canvas.width, canvas.height)
                     canvas.drawBitmap(bmp, null, dst, Paint())
                 }
 
-            } catch (e: Exception) {
-                // 🔥 ніколи не даємо впасти wallpaper
             } finally {
-                try {
-                    holder.unlockCanvasAndPost(canvas)
-                } catch (_: Exception) {}
+                surfaceHolder.unlockCanvasAndPost(canvas)
             }
         }
     }
