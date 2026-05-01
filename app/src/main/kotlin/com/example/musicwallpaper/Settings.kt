@@ -12,8 +12,8 @@ object Settings {
         return prefs.getStringSet(KEY, emptySet()) ?: emptySet()
     }
 
-    fun setAllowedApps(context: Context, set: Set<String>) {
+    fun setAllowedApps(context: Context, apps: Set<String>) {
         val prefs = context.getSharedPreferences(PREF, Context.MODE_PRIVATE)
-        prefs.edit().putStringSet(KEY, set).apply()
+        prefs.edit().putStringSet(KEY, apps).apply()
     }
 }

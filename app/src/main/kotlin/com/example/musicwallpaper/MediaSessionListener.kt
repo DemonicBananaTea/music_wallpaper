@@ -2,8 +2,6 @@ package com.example.musicwallpaper
 
 import android.content.ComponentName
 import android.content.Context
-import android.graphics.Bitmap
-import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 
 class MediaSessionReader(private val context: Context) {
@@ -15,28 +13,26 @@ class MediaSessionReader(private val context: Context) {
         ComponentName(context, DummyNotificationListener::class.java)
 
     fun update() {
-    try {
-        val allowed = Settings.getAllowedApps(context)
+        try {
+            val allowed = Settings.getAllowedApps(context)
 
-        val sessions = manager.getActiveSessions(component)
+            val sessions = manager.getActiveSessions(component)
 
-        val controller = sessions
-            .filter { allowed.contains(it.packageName) }
-            .firstOrNull()
+            val controller = sessions.firstOrNull {
+                allowed.contains(it.packageName)
+            }
 
-        if (controller == null) {
-            ArtworkStore.currentBitmap = null
-            ArtworkStore.lastUpdateTime = System.currentTimeMillis()
-            return
-        }
+            if (controller == null) {
+                ArtworkStore.currentBitmap = null
+                return
+            }
 
-        val bmp = controller.metadata?.description?.iconBitmap
+            val bmp = controller.metadata?.description?.iconBitmap
 
-        if (bmp != null) {
             ArtworkStore.currentBitmap = bmp
-            ArtworkStore.lastUpdateTime = System.currentTimeMillis()
-        }
 
-    } catch (_: Exception) {}
-}
+        } catch (_: Exception) {
+            ArtworkStore.currentBitmap = null
+        }
+    }
 }
