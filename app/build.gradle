@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.application'
+    id 'org.jetbrains.kotlin.android' // ДОДАЙ ЦЕ
 }
 
 android {
@@ -10,13 +11,25 @@ android {
         applicationId "com.example.musicwallpaper"
         minSdk 26
         targetSdk 33
+        versionCode 1
+        versionName "1.0"
     }
 
     buildTypes {
         release {
             minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+    }
+    
+    // ДОДАЙ ЦЕ, щоб він розумів, де лежить код
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
     }
 }
 
-dependencies {}
+dependencies {
+    // Тобі потрібна база для роботи Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.0" 
+}
+
