@@ -40,4 +40,8 @@ class AppSelectActivity : AppCompatActivity() {
 
         recycler.adapter = adapter
     }
+    override fun onResume() {
+    super.onResume()
+    android.util.Log.e("APP_SELECT", "RESUMED")
+}
 }

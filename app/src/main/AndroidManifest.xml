@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.musicwallpaper">
 
-    <application>
-android:theme="@android:style/Theme.Material.Light.NoActionBar"
+    <application android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+
         <service
             android:name=".MainWallpaperService"
             android:permission="android.permission.BIND_WALLPAPER"
