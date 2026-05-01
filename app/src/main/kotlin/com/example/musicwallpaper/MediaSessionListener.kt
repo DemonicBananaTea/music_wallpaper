@@ -13,26 +13,24 @@ class MediaSessionReader(private val context: Context) {
         ComponentName(context, DummyNotificationListener::class.java)
 
     fun update() {
-        try {
-            val allowed = Settings.getAllowedApps(context)
 
-            val sessions = manager.getActiveSessions(component)
+        val allowed = Settings.getAllowedApps(context)
 
-            val controller = sessions.firstOrNull {
-                allowed.contains(it.packageName)
-            }
+        val sessions = manager.getActiveSessions(component)
 
-            if (controller == null) {
-                ArtworkStore.currentBitmap = null
-                return
-            }
-
-            val bmp = controller.metadata?.description?.iconBitmap
-
-            ArtworkStore.currentBitmap = bmp
-
-        } catch (_: Exception) {
-            ArtworkStore.currentBitmap = null
+        // 🔥 шукаємо сесію тільки з ОБРАНИХ застосунків
+        val controller = sessions.firstOrNull { session ->
+            allowed.contains(session.packageName)
         }
+
+        // ❌ якщо немає активної сесії для обраних apps
+        if (controller == null) {
+            ArtworkStore.currentBitmap = null
+            return
+        }
+
+        // ✅ якщо є — беремо обкладинку
+        ArtworkStore.currentBitmap =
+            controller.metadata?.description?.iconBitmap
     }
 }
