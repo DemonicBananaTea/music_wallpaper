@@ -24,12 +24,13 @@ class AppSelectActivity : AppCompatActivity() {
         val saved = Settings.getAllowedApps(this)
 
         val items = installed.map {
+        val ai = it.activityInfo
             AppItem(
-                label = pm.getApplicationLabel(it).toString(),
-                packageName = it.packageName,
-                selected = saved.contains(it.packageName)
+                label = it.loadLabel(pm).toString(),
+                packageName = ai.packageName,
+                selected = saved.contains(ai.packageName)
             )
-        }.sortedBy { it.label.lowercase() }
+        }
 
         val adapter = AppAdapter(items) { updated ->
             val selected = updated
