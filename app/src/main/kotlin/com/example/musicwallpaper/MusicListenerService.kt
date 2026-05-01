@@ -2,28 +2,32 @@ package com.example.musicwallpaper
 
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
-import android.graphics.Bitmap
+import android.util.Log
 
 class MusicListenerService : NotificationListenerService() {
 
+    override fun onCreate() {
+        super.onCreate()
+        Log.e("MUSIC", "SERVICE CREATED")
+    }
+
     override fun onListenerConnected() {
-        android.util.Log.e("MUSIC", "CONNECTED")
+        super.onListenerConnected()
+        Log.e("MUSIC", "LISTENER CONNECTED")
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
-        try {
-            val icon = sbn.notification?.getLargeIcon()
-            val bmp = icon?.loadDrawable(this)?.let {
-                Utils.drawableToBitmap(it)
-            }
+        Log.e("MUSIC", "POSTED: ${sbn.packageName}")
 
-            if (bmp != null) {
-                ArtworkStore.bitmap = bmp
-                android.util.Log.e("MUSIC", "BITMAP UPDATED")
-            }
-
-        } catch (e: Exception) {
-            android.util.Log.e("MUSIC", "ERROR", e)
+        val n = sbn.notification
+        if (n != null) {
+            Log.e("MUSIC", "HAS NOTIFICATION: ${n.extras}")
+        } else {
+            Log.e("MUSIC", "NOTIFICATION IS NULL")
         }
+    }
+
+    override fun onNotificationRemoved(sbn: StatusBarNotification) {
+        Log.e("MUSIC", "REMOVED: ${sbn.packageName}")
     }
 }
