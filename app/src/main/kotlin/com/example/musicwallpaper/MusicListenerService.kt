@@ -8,30 +8,39 @@ class MusicListenerService : NotificationListenerService() {
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
 
-        try {
-            val extras = sbn.notification?.extras ?: return
+    android.util.Log.d("MUSIC", "NOTIF from: ${sbn.packageName}")
 
-            val bitmap: Bitmap? =
-                extras.getParcelable("android.largeIcon")
-                    ?: extras.getParcelable("android.picture")
-                    ?: sbn.notification?.getLargeIcon()
-                        ?.loadDrawable(this)
-                        ?.let { Utils.drawableToBitmap(it) }
+    try {
+        val extras = sbn.notification?.extras ?: return
 
-            // 🧠 тільки базова перевірка (без фільтрів)
-            if (bitmap != null &&
-                bitmap.width > 50 &&
-                bitmap.height > 50
-            ) {
-                ArtworkStore.currentBitmap = bitmap
-                ArtworkStore.lastUpdateTime = System.currentTimeMillis()
-            }
+        android.util.Log.d(
+            "MUSIC",
+            "has largeIcon = ${extras.containsKey("android.largeIcon")}"
+        )
 
-        } catch (e: Exception) {
-            // ❗ ніколи не даємо listener'у падати
-            e.printStackTrace()
+        val bitmap =
+            extras.getParcelable("android.largeIcon")
+                ?: extras.getParcelable("android.picture")
+                ?: sbn.notification?.getLargeIcon()
+                    ?.loadDrawable(this)
+                    ?.let { Utils.drawableToBitmap(it) }
+
+        android.util.Log.d(
+            "MUSIC",
+            "bitmap created = ${bitmap != null}"
+        )
+
+        if (bitmap != null && bitmap.width > 50 && bitmap.height > 50) {
+            ArtworkStore.currentBitmap = bitmap
+            ArtworkStore.lastUpdateTime = System.currentTimeMillis()
+
+            android.util.Log.d("MUSIC", "STORE UPDATED")
         }
+
+    } catch (e: Exception) {
+        android.util.Log.e("MUSIC", "ERROR", e)
     }
+}
 
     override fun onNotificationRemoved(sbn: StatusBarNotification) {
         // нічого не робимо — чиста логіка
