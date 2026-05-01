@@ -6,6 +6,8 @@ import android.os.Handler
 import android.os.Looper
 import android.service.wallpaper.WallpaperService
 import android.view.SurfaceHolder
+import android.graphics.RenderEffect
+import android.graphics.Shader
 import android.graphics.Paint
 import android.graphics.RectF
 import android.os.Build
@@ -77,22 +79,7 @@ class MainWallpaperService : WallpaperService() {
             handler.removeCallbacks(drawRunnable)
         }
         
-        fun blurBitmap(src: Bitmap, radius: Float): Bitmap {
-    val bitmap = Bitmap.createBitmap(
-        src.width,
-        src.height,
-        Bitmap.Config.ARGB_8888
-    )
-
-    val canvas = Canvas(bitmap)
-    val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-
-    // ❗ простий варіант (без RenderEffect)
-    // поки що просто малюємо як є
-    canvas.drawBitmap(src, 0f, 0f, paint)
-
-    return bitmap
-}
+        
 
         private fun drawFrame() {
     val holder = surfaceHolder
@@ -119,23 +106,39 @@ class MainWallpaperService : WallpaperService() {
             val left = (canvasW - scaledW) / 2f
             val top = (canvasH - scaledH) / 2f
 
-            val dst = RectF(
+            val dst = android.graphics.RectF(
                 left,
                 top,
                 left + scaledW,
                 top + scaledH
             )
 
-            val displayed = blurBitmap(bmp, 40f)
+            val paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
-            canvas.drawBitmap(displayed, null, dst, null)
+            // 🔥 РЕАЛЬНИЙ BLUR (Android 12+)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                paint.setRenderEffect(
+                    RenderEffect.createBlurEffect(
+                        50f,
+                        50f,
+                        Shader.TileMode.CLAMP
+                    )
+                )
+            }
 
+            canvas.drawBitmap(bmp, null, dst, paint)
+
+            // 🔥 затемнення 30%
             val darkPaint = Paint().apply {
                 color = Color.BLACK
                 alpha = (255 * 0.30f).toInt()
             }
 
-            canvas.drawRect(0f, 0f, canvasW, canvasH, darkPaint)
+            canvas.drawRect(
+                0f, 0f,
+                canvasW, canvasH,
+                darkPaint
+            )
         }
 
     } finally {
