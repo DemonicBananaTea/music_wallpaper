@@ -93,13 +93,30 @@ class MainWallpaperService : WallpaperService() {
         }
 
         private fun drawBitmap(canvas: Canvas, bitmap: Bitmap, alpha: Float) {
-            val paint = Paint().apply {
-                this.alpha = (alpha * 255).toInt().coerceIn(0, 255)
-            }
+    val paint = Paint().apply {
+        this.alpha = (alpha * 255).toInt()
+    }
 
-            val rect = Rect(0, 0, canvas.width, canvas.height)
-            canvas.drawBitmap(bitmap, null, rect, paint)
-        }
+    val canvasRatio = canvas.width.toFloat() / canvas.height
+    val bitmapRatio = bitmap.width.toFloat() / bitmap.height
+
+    val srcRect: Rect
+    val dstRect = Rect(0, 0, canvas.width, canvas.height)
+
+    if (bitmapRatio > canvasRatio) {
+        // bitmap ширший → обрізаємо по ширині
+        val newWidth = (bitmap.height * canvasRatio).toInt()
+        val xOffset = (bitmap.width - newWidth) / 2
+        srcRect = Rect(xOffset, 0, xOffset + newWidth, bitmap.height)
+    } else {
+        // bitmap вищий → обрізаємо по висоті
+        val newHeight = (bitmap.width / canvasRatio).toInt()
+        val yOffset = (bitmap.height - newHeight) / 2
+        srcRect = Rect(0, yOffset, bitmap.width, yOffset + newHeight)
+    }
+
+    canvas.drawBitmap(bitmap, srcRect, dstRect, paint)
+}
 
         private fun blurAndDarkenSafe(src: Bitmap): Bitmap {
             val safeSrc = try {
@@ -112,7 +129,7 @@ class MainWallpaperService : WallpaperService() {
                 return src
             }
 
-            val scaled = Bitmap.createScaledBitmap(safeSrc, 20, 20, true)
+            val scaled = Bitmap.createScaledBitmap(safeSrc, 100, 100, true)
 
             val result = Bitmap.createScaledBitmap(
                 scaled,
