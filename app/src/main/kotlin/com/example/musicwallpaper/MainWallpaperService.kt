@@ -65,7 +65,7 @@ class MainWallpaperService : WallpaperService() {
                 val bmp = ArtworkStore.currentBitmap
 
                 if (bmp == null) {
-                    canvas.drawColor(Color.BLACK)
+                    canvas.drawColor(Color.RED)
                 } else {
                     canvas.drawColor(Color.BLACK) // фон під картинкою
                     canvas.drawBitmap(bmp, 0f, 0f, null)

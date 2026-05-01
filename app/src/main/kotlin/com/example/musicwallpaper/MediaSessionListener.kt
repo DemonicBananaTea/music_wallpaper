@@ -40,6 +40,8 @@ Log.e("MEDIA", "controller = ${controller?.packageName}")
             // є сесія, але нема обкладинки
             ArtworkStore.currentBitmap = null
         }
+        
+        ArtworkStore.currentBitmap = null
 
     } catch (e: Exception) {
         e.printStackTrace()
