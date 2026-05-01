@@ -1,5 +1,7 @@
 package com.example.musicwallpaper
 
+import android.graphics.Bitmap
+
 object ArtworkStore {
-    var lastUpdateTime: Long = 0
+    @Volatile var bitmap: Bitmap? = null
 }

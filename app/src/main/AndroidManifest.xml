@@ -4,6 +4,20 @@
     <application>
 
         <service
+            android:name=".MainWallpaperService"
+            android:permission="android.permission.BIND_WALLPAPER"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService"/>
+            </intent-filter>
+
+            <meta-data
+                android:name="android.service.wallpaper"
+                android:resource="@xml/wallpaper"/>
+        </service>
+
+        <service
             android:name=".MusicListenerService"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
             android:exported="true">
@@ -14,16 +28,6 @@
 
         </service>
 
-        <service
-            android:name=".MainWallpaperService"
-            android:permission="android.permission.BIND_WALLPAPER"
-            android:exported="true">
-
-            <intent-filter>
-                <action android:name="android.service.wallpaper.WallpaperService"/>
-            </intent-filter>
-
-        </service>
-
     </application>
+
 </manifest>
