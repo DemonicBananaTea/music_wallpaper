@@ -34,7 +34,6 @@ class MediaSessionReader(private val context: Context) {
 
         if (bmp != null) {
             ArtworkStore.currentBitmap = bmp
-            ArtworkStore.lastUpdateTime = System.currentTimeMillis()
         } else {
             // є сесія, але нема обкладинки
             ArtworkStore.currentBitmap = null
