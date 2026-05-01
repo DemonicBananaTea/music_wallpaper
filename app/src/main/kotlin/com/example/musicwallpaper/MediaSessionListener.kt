@@ -21,14 +21,14 @@ class MediaSessionReader(private val context: Context) {
     try {
         val sessions = manager.getActiveSessions(component)
 
-        val controller = sessions.firstOrNull() ?: return
+        val allowed = Settings.getAllowedApps(context)
 
-        val packageName = controller.packageName
-
-        if (allowedApps.isNotEmpty() && !allowedApps.contains(packageName)) {
-    ArtworkStore.bitmap = null
-    return
-}
+        val controller = sessions.firstOrNull { session ->
+            allowed.contains(session.packageName)
+        } ?: run {
+            ArtworkStore.bitmap = null
+            return
+        }
 
         val bmp = controller.metadata?.description?.iconBitmap
 
@@ -36,7 +36,6 @@ class MediaSessionReader(private val context: Context) {
             ArtworkStore.bitmap = bmp
         }
 
-    } catch (_: Exception) {
-    }
+    } catch (_: Exception) {}
 }
 }
