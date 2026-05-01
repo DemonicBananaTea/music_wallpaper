@@ -164,19 +164,29 @@ class MainWallpaperService : WallpaperService() {
             val left = (canvasW - scaledW) / 2f
             val top = (canvasH - scaledH) / 2f
 
-            val dst = android.graphics.RectF(
+            val dst = RectF(
                 left,
                 top,
                 left + scaledW,
                 top + scaledH
             )
 
-            // 🔥 РОЗМИТИЙ ФОН
-            val blurred = blurBitmap(bmp, 6)
+            val paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
-            canvas.drawBitmap(blurred, null, dst, null)
+            // 🔥 GPU BLUR (REAL)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                paint.setRenderEffect(
+                    RenderEffect.createBlurEffect(
+                        60f,
+                        60f,
+                        Shader.TileMode.CLAMP
+                    )
+                )
+            }
 
-            // 🔥 ЗАТЕМНЕННЯ 30%
+            canvas.drawBitmap(bmp, null, dst, paint)
+
+            // 🔥 30% затемнення
             val darkPaint = Paint().apply {
                 color = Color.BLACK
                 alpha = (255 * 0.30f).toInt()
