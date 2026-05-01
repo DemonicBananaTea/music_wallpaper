@@ -4,16 +4,37 @@ import android.graphics.Canvas
 import android.service.wallpaper.WallpaperService
 import android.view.SurfaceHolder
 
-class MusicWallpaperService : WallpaperService() {
+class MainWallpaperService : WallpaperService() {
 
     override fun onCreateEngine(): Engine {
-        return Engine()
+        return MusicEngine()
     }
 
-    inner class Engine : WallpaperService.Engine() {
+    inner class MusicEngine : Engine() {
 
-        override fun onDraw(surfaceHolder: SurfaceHolder) {
-            val canvas: Canvas = surfaceHolder.lockCanvas() ?: return
+        override fun onSurfaceCreated(holder: SurfaceHolder) {
+            super.onSurfaceCreated(holder)
+            drawFrame(holder)
+        }
+
+        override fun onVisibilityChanged(visible: Boolean) {
+            if (visible) {
+                drawFrame(surfaceHolder)
+            }
+        }
+
+        override fun onSurfaceChanged(
+            holder: SurfaceHolder,
+            format: Int,
+            width: Int,
+            height: Int
+        ) {
+            super.onSurfaceChanged(holder, format, width, height)
+            drawFrame(holder)
+        }
+
+        private fun drawFrame(holder: SurfaceHolder) {
+            val canvas: Canvas = holder.lockCanvas() ?: return
 
             try {
                 val bmp = ArtworkStore.currentBitmap
@@ -25,7 +46,7 @@ class MusicWallpaperService : WallpaperService() {
                 }
 
             } finally {
-                surfaceHolder.unlockCanvasAndPost(canvas)
+                holder.unlockCanvasAndPost(canvas)
             }
         }
     }
