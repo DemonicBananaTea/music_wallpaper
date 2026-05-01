@@ -80,7 +80,14 @@ class MainWallpaperService : WallpaperService() {
         }
         
         fun blurBitmap(src: Bitmap, radius: Int): Bitmap {
-    val bitmap = src.copy(Bitmap.Config.ARGB_8888, true)
+
+    // 🔥 1. зменшуємо (це ключ до “красивого blur”)
+    val smallW = src.width / 4
+    val smallH = src.height / 4
+
+    val small = Bitmap.createScaledBitmap(src, smallW, smallH, true)
+
+    val bitmap = small.copy(Bitmap.Config.ARGB_8888, true)
 
     val w = bitmap.width
     val h = bitmap.height
@@ -88,37 +95,30 @@ class MainWallpaperService : WallpaperService() {
     val pixels = IntArray(w * h)
     bitmap.getPixels(pixels, 0, w, 0, 0, w, h)
 
-    val div = radius.coerceIn(1, 25)
-
-    val r = IntArray(pixels.size)
-    val g = IntArray(pixels.size)
-    val b = IntArray(pixels.size)
-
-    for (i in pixels.indices) {
-        val color = pixels[i]
-        r[i] = (color shr 16) and 0xff
-        g[i] = (color shr 8) and 0xff
-        b[i] = color and 0xff
-    }
+    val div = radius.coerceIn(1, 8)
 
     val tmp = IntArray(pixels.size)
 
     for (y in 0 until h) {
         for (x in 0 until w) {
-            var rs = 0
-            var gs = 0
-            var bs = 0
+
+            var r = 0
+            var g = 0
+            var b = 0
             var count = 0
 
             for (dy in -div..div) {
                 for (dx in -div..div) {
                     val nx = x + dx
                     val ny = y + dy
+
                     if (nx in 0 until w && ny in 0 until h) {
                         val idx = ny * w + nx
-                        rs += r[idx]
-                        gs += g[idx]
-                        bs += b[idx]
+                        val color = pixels[idx]
+
+                        r += (color shr 16) and 0xff
+                        g += (color shr 8) and 0xff
+                        b += color and 0xff
                         count++
                     }
                 }
@@ -127,14 +127,16 @@ class MainWallpaperService : WallpaperService() {
             val i = y * w + x
             tmp[i] =
                 (0xff shl 24) or
-                ((rs / count) shl 16) or
-                ((gs / count) shl 8) or
-                (bs / count)
+                ((r / count) shl 16) or
+                ((g / count) shl 8) or
+                (b / count)
         }
     }
 
     bitmap.setPixels(tmp, 0, w, 0, 0, w, h)
-    return bitmap
+
+    // 🔥 2. повертаємо назад у великий розмір
+    return Bitmap.createScaledBitmap(bitmap, src.width, src.height, true)
 }
 
         private fun drawFrame() {
