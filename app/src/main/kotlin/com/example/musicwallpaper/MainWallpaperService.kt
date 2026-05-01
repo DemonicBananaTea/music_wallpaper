@@ -79,7 +79,63 @@ class MainWallpaperService : WallpaperService() {
             handler.removeCallbacks(drawRunnable)
         }
         
-        
+        fun blurBitmap(src: Bitmap, radius: Int): Bitmap {
+    val bitmap = src.copy(Bitmap.Config.ARGB_8888, true)
+
+    val w = bitmap.width
+    val h = bitmap.height
+
+    val pixels = IntArray(w * h)
+    bitmap.getPixels(pixels, 0, w, 0, 0, w, h)
+
+    val div = radius.coerceIn(1, 25)
+
+    val r = IntArray(pixels.size)
+    val g = IntArray(pixels.size)
+    val b = IntArray(pixels.size)
+
+    for (i in pixels.indices) {
+        val color = pixels[i]
+        r[i] = (color shr 16) and 0xff
+        g[i] = (color shr 8) and 0xff
+        b[i] = color and 0xff
+    }
+
+    val tmp = IntArray(pixels.size)
+
+    for (y in 0 until h) {
+        for (x in 0 until w) {
+            var rs = 0
+            var gs = 0
+            var bs = 0
+            var count = 0
+
+            for (dy in -div..div) {
+                for (dx in -div..div) {
+                    val nx = x + dx
+                    val ny = y + dy
+                    if (nx in 0 until w && ny in 0 until h) {
+                        val idx = ny * w + nx
+                        rs += r[idx]
+                        gs += g[idx]
+                        bs += b[idx]
+                        count++
+                    }
+                }
+            }
+
+            val i = y * w + x
+            tmp[i] =
+                (0xff shl 24) or
+                ((rs / count) shl 16) or
+                ((gs / count) shl 8) or
+                (bs / count)
+        }
+    }
+
+    bitmap.setPixels(tmp, 0, w, 0, 0, w, h)
+    return bitmap
+}
 
         private fun drawFrame() {
     val holder = surfaceHolder
@@ -113,32 +169,18 @@ class MainWallpaperService : WallpaperService() {
                 top + scaledH
             )
 
-            val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+            // 🔥 РОЗМИТИЙ ФОН
+            val blurred = blurBitmap(bmp, 6)
 
-            // 🔥 РЕАЛЬНИЙ BLUR (Android 12+)
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                paint.setRenderEffect(
-                    RenderEffect.createBlurEffect(
-                        50f,
-                        50f,
-                        Shader.TileMode.CLAMP
-                    )
-                )
-            }
+            canvas.drawBitmap(blurred, null, dst, null)
 
-            canvas.drawBitmap(bmp, null, dst, paint)
-
-            // 🔥 затемнення 30%
+            // 🔥 ЗАТЕМНЕННЯ 30%
             val darkPaint = Paint().apply {
                 color = Color.BLACK
                 alpha = (255 * 0.30f).toInt()
             }
 
-            canvas.drawRect(
-                0f, 0f,
-                canvasW, canvasH,
-                darkPaint
-            )
+            canvas.drawRect(0f, 0f, canvasW, canvasH, darkPaint)
         }
 
     } finally {
