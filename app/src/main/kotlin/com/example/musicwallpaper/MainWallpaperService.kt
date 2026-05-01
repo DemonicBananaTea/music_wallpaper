@@ -124,20 +124,22 @@ class MainWallpaperService : WallpaperService() {
         private fun blurAndDarkenSafe(src: Bitmap): Bitmap {
     val bitmap = src.copy(Bitmap.Config.ARGB_8888, true)
 
+    // простий багатошаровий blur ефект
     val canvas = Canvas(bitmap)
+    val paint = Paint()
 
-    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-        val paint = Paint()
-
-        paint.renderEffect = RenderEffect.createBlurEffect(
-            60f, 60f, Shader.TileMode.CLAMP
-        )
-
-        canvas.drawBitmap(bitmap, 0f, 0f, paint)
+    // багаторазове накладання з оффсетом = “blur”
+    for (i in 1..6) {
+        paint.alpha = 40
+        canvas.drawBitmap(bitmap, i.toFloat(), i.toFloat(), paint)
+        canvas.drawBitmap(bitmap, -i.toFloat(), i.toFloat(), paint)
+        canvas.drawBitmap(bitmap, i.toFloat(), -i.toFloat(), paint)
+        canvas.drawBitmap(bitmap, -i.toFloat(), -i.toFloat(), paint)
     }
 
+    // затемнення
     val darkPaint = Paint().apply {
-        color = Color.argb(120, 0, 0, 0)
+        color = Color.argb(140, 0, 0, 0)
     }
 
     canvas.drawRect(
