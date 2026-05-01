@@ -2,53 +2,42 @@ package com.example.musicwallpaper
 
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.widget.CheckBox
-import android.widget.LinearLayout
-import android.widget.ScrollView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 class AppSelectActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_app_select)
 
-        val scroll = ScrollView(this)
-        val container = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-        }
-
-        scroll.addView(container)
-        setContentView(scroll)
+        val recycler = findViewById<RecyclerView>(R.id.recycler)
+        recycler.layoutManager = LinearLayoutManager(this)
 
         val pm = packageManager
 
-        val apps = pm.getInstalledApplications(PackageManager.GET_META_DATA)
-            .sortedBy { it.packageName }
+        val installed = pm.getInstalledApplications(PackageManager.GET_META_DATA)
 
-        val selected = Settings.getAllowedApps(this).toMutableSet()
+        val saved = Settings.getAllowedApps(this)
 
-        for (app in apps) {
+        val items = installed.map {
+            AppItem(
+                label = pm.getApplicationLabel(it).toString(),
+                packageName = it.packageName,
+                selected = saved.contains(it.packageName)
+            )
+        }.sortedBy { it.label.lowercase() }
 
-            val label = try {
-                pm.getApplicationLabel(app).toString()
-            } catch (e: Exception) {
-                app.packageName
-            }
+        val adapter = AppAdapter(items) { updated ->
+            val selected = updated
+                .filter { it.selected }
+                .map { it.packageName }
+                .toSet()
 
-            val pkg = app.packageName
-
-            val cb = CheckBox(this)
-            cb.text = label
-            cb.isChecked = selected.contains(pkg)
-
-            cb.setOnCheckedChangeListener { _, isChecked ->
-                if (isChecked) selected.add(pkg)
-                else selected.remove(pkg)
-
-                Settings.setAllowedApps(this, selected.toSet())
-            }
-
-            container.addView(cb)
+            Settings.setAllowedApps(this, selected)
         }
+
+        recycler.adapter = adapter
     }
 }
