@@ -56,10 +56,15 @@ class AppSelectActivity : AppCompatActivity() {
 
     val apps = pm.queryIntentActivities(intent, 0)
 
+    val saved = Settings.getAllowedApps(context)
+
     return apps.map {
+        val pkg = it.activityInfo.packageName
+
         AppItem(
-            packageName = it.activityInfo.packageName,
-            label = it.loadLabel(pm).toString()
+            packageName = pkg,
+            label = it.loadLabel(pm).toString(),
+            selected = saved.contains(pkg)   // 💥 ОЦЕ ВАЖЛИВО
         )
     }.sortedBy { it.label }
 }
