@@ -17,13 +17,25 @@ class MainWallpaperService : WallpaperService() {
 
         private val handler = Handler(Looper.getMainLooper())
         private var visible = false
+
         private val reader by lazy { MediaSessionReader(applicationContext) }
-        private val frameRunnable = object : Runnable {
+
+        // 🔥 ОНОВЛЕННЯ СЕСІЙ (рідко)
+        private val updateRunnable = object : Runnable {
             override fun run() {
                 if (visible) {
                     reader.update()
+                    handler.postDelayed(this, 1500L) // 1.5 сек
+                }
+            }
+        }
+
+        // 🔥 РЕНДЕР (часто)
+        private val drawRunnable = object : Runnable {
+            override fun run() {
+                if (visible) {
                     drawFrame()
-                    handler.postDelayed(this, 1000L / 30L) // ~30 FPS
+                    handler.postDelayed(this, 33L) // ~30 FPS
                 }
             }
         }
@@ -31,10 +43,12 @@ class MainWallpaperService : WallpaperService() {
         override fun onVisibilityChanged(isVisible: Boolean) {
             visible = isVisible
 
+            handler.removeCallbacks(updateRunnable)
+            handler.removeCallbacks(drawRunnable)
+
             if (isVisible) {
-                handler.post(frameRunnable)
-            } else {
-                handler.removeCallbacks(frameRunnable)
+                handler.post(updateRunnable)
+                handler.post(drawRunnable)
             }
         }
 
@@ -55,7 +69,8 @@ class MainWallpaperService : WallpaperService() {
 
         override fun onDestroy() {
             super.onDestroy()
-            handler.removeCallbacks(frameRunnable)
+            handler.removeCallbacks(updateRunnable)
+            handler.removeCallbacks(drawRunnable)
         }
 
         private fun drawFrame() {
@@ -65,10 +80,9 @@ class MainWallpaperService : WallpaperService() {
             try {
                 val bmp = ArtworkStore.currentBitmap
 
-                if (bmp == null) {
-                    canvas.drawColor(Color.BLACK)
-                } else {
-                    canvas.drawColor(Color.BLACK) // фон під картинкою
+                canvas.drawColor(Color.BLACK)
+
+                if (bmp != null) {
                     canvas.drawBitmap(bmp, 0f, 0f, null)
                 }
 

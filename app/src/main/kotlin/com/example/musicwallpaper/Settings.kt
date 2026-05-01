@@ -9,11 +9,13 @@ object Settings {
 
     fun getAllowedApps(context: Context): Set<String> {
         val prefs = context.getSharedPreferences(PREF, Context.MODE_PRIVATE)
-        return prefs.getStringSet(KEY, emptySet()) ?: emptySet()
+        return prefs.getStringSet(KEY, emptySet())?.toSet() ?: emptySet()
     }
 
     fun setAllowedApps(context: Context, apps: Set<String>) {
         val prefs = context.getSharedPreferences(PREF, Context.MODE_PRIVATE)
-        prefs.edit().putStringSet(KEY, apps).apply()
+        prefs.edit()
+            .putStringSet(KEY, HashSet(apps))
+            .apply()
     }
 }

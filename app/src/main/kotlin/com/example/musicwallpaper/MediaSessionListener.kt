@@ -14,36 +14,20 @@ class MediaSessionReader(private val context: Context) {
         ComponentName(context, DummyNotificationListener::class.java)
 
     fun update() {
-    try {
+        val allowed = Settings.getAllowedApps(context)
+        val sessions = manager.getActiveSessions(component)
 
-val sessions = manager.getActiveSessions(component)
-Log.e("MEDIA", "sessions = ${sessions.map { it.packageName }}")
+        val controller = sessions.firstOrNull {
+            allowed.contains(it.packageName)
+        }
 
-val allowed = Settings.getAllowedApps(context)
-Log.e("MEDIA", "allowed = $allowed")
-
-//val controller = sessions.firstOrNull { allowed.contains(it.packageName) }
-Log.e("MEDIA", "controller = ${controller?.packageName}")
-Log.e("MEDIA", "sessions = ${sessions.map { it.packageName }}")
-Log.e("MEDIA", "allowed = $allowed")
-val controller = sessions.firstOrNull()
         if (controller == null) {
-            // ❌ нема активної сесії обраного app
             ArtworkStore.currentBitmap = null
             return
         }
 
         val bmp = controller.metadata?.description?.iconBitmap
 
-        if (bmp != null) {
-            ArtworkStore.currentBitmap = bmp
-        } else {
-            // є сесія, але нема обкладинки
-            ArtworkStore.currentBitmap = null
-        }
-
-    } catch (e: Exception) {
-        e.printStackTrace()
+        ArtworkStore.currentBitmap = bmp
     }
-}
 }

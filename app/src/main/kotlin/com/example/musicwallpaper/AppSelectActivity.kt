@@ -12,8 +12,10 @@ class AppSelectActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val recycler = RecyclerView(this)
-        recycler.layoutManager = LinearLayoutManager(this)
+        val recycler = RecyclerView(this).apply {
+            layoutManager = LinearLayoutManager(this@AppSelectActivity)
+        }
+
         setContentView(recycler)
 
         val pm = packageManager
@@ -24,16 +26,31 @@ class AppSelectActivity : AppCompatActivity() {
 
         val apps = pm.queryIntentActivities(intent, 0)
 
+        val saved = Settings.getAllowedApps(this)
+
         val items = apps.map {
+            val pkg = it.activityInfo.packageName
+
             AppItem(
                 label = it.loadLabel(pm).toString(),
-                packageName = it.activityInfo.packageName,
-                selected = false
+                packageName = pkg,
+                selected = saved.contains(pkg)   // 🔥 ВАЖЛИВО
             )
         }.sortedBy { it.label.lowercase() }
 
         Log.e("APPS", "COUNT = ${items.size}")
+        Log.e("APPS", "SAVED = $saved")
 
-        recycler.adapter = AppAdapter(items) {}
+        recycler.adapter = AppAdapter(items) { updated ->
+
+            val selected = updated
+                .filter { it.selected }
+                .map { it.packageName }
+                .toSet()
+
+            Log.e("APPS", "NEW SAVED = $selected")
+
+            Settings.setAllowedApps(this, selected)
+        }
     }
 }
