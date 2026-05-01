@@ -1,20 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-package="com.example.musicwallpaper">
+    package="com.example.musicwallpaper">
+
     <application>
-
-        <service
-            android:name=".MainWallpaperService"
-            android:permission="android.permission.BIND_WALLPAPER"
-            android:exported="true">
-
-            <intent-filter>
-                <action android:name="android.service.wallpaper.WallpaperService"/>
-            </intent-filter>
-
-            <meta-data
-                android:name="android.service.wallpaper"
-                android:resource="@xml/wallpaper"/>
-        </service>
 
         <service
             android:name=".MusicListenerService"
@@ -27,6 +14,16 @@ package="com.example.musicwallpaper">
 
         </service>
 
-    </application>
+        <service
+            android:name=".MainWallpaperService"
+            android:permission="android.permission.BIND_WALLPAPER"
+            android:exported="true">
 
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService"/>
+            </intent-filter>
+
+        </service>
+
+    </application>
 </manifest>
