@@ -21,7 +21,7 @@ class MainWallpaperService : WallpaperService() {
                 if (running) {
                     reader.update()
                     draw()
-                    handler.postDelayed(this, 1000) // 1 сек — достатньо
+                    handler.postDelayed(this, 1000)
                 }
             }
         }
@@ -37,8 +37,17 @@ class MainWallpaperService : WallpaperService() {
             else handler.removeCallbacks(frame)
         }
 
+        override fun onDestroy() {
+            running = false
+            handler.removeCallbacks(frame)
+            super.onDestroy()
+        }
+
         private fun draw() {
-            val canvas = surfaceHolder.lockCanvas() ?: return
+            val holder = surfaceHolder
+            if (!holder.surface.isValid) return
+
+            val canvas = holder.lockCanvas() ?: return
 
             try {
                 canvas.drawColor(Color.BLACK)
@@ -49,7 +58,9 @@ class MainWallpaperService : WallpaperService() {
                 }
 
             } finally {
-                surfaceHolder.unlockCanvasAndPost(canvas)
+                try {
+                    holder.unlockCanvasAndPost(canvas)
+                } catch (_: Exception) {}
             }
         }
     }
