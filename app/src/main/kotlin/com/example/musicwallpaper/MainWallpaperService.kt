@@ -5,7 +5,11 @@ import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
 import android.service.wallpaper.WallpaperService
-import android.view.SurfaceHolder
+import android.view.SurfaceHolde
+import android.graphics.RenderEffect
+import android.graphics.Shader
+import android.graphics.Paint
+import android.graphics.RectF
 
 class MainWallpaperService : WallpaperService() {
 
