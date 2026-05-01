@@ -1,6 +1,6 @@
 plugins {
     id 'com.android.application'
-    id 'org.jetbrains.kotlin.android' version '1.8.20' apply true
+    id 'org.jetbrains.kotlin.android' version '1.8.20'
 }
 
 android {
@@ -21,15 +21,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    
-    // ДОДАЙ ЦЕ, щоб він розумів, де лежить код
-    sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
-    }
 }
 
 dependencies {
     // Тобі потрібна база для роботи Kotlin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.0" 
+    implementation "androidx.appcompat:appcompat:1.6.1"
 }
 
