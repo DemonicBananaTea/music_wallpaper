@@ -14,15 +14,16 @@ class MediaSessionReader(private val context: Context) {
 
     fun update() {
     try {
-        val allowed = Settings.getAllowedApps(context)
+        Log.e("MEDIA", "UPDATE CALLED")
 
-        val sessions = manager.getActiveSessions(component)
-android.util.Log.e("MEDIA", "sessions: ${sessions.map { it.packageName }}")
-android.util.Log.e("MEDIA", "allowed: $allowed")
-        // 🔥 шукаємо сесію тільки серед обраних застосунків
-        val controller = sessions.firstOrNull { session ->
-            allowed.contains(session.packageName)
-        }
+val sessions = manager.getActiveSessions(component)
+Log.e("MEDIA", "sessions = ${sessions.map { it.packageName }}")
+
+val allowed = Settings.getAllowedApps(context)
+Log.e("MEDIA", "allowed = $allowed")
+
+val controller = sessions.firstOrNull { allowed.contains(it.packageName) }
+Log.e("MEDIA", "controller = ${controller?.packageName}")
 
         if (controller == null) {
             // ❌ нема активної сесії обраного app
