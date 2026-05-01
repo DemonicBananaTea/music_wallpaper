@@ -26,7 +26,6 @@ class MediaSessionReader(private val context: Context) {
         if (controller == null) {
             // ❌ нема активної сесії обраного app
             ArtworkStore.currentBitmap = null
-            ArtworkStore.lastUpdateTime = System.currentTimeMillis()
             return
         }
 
