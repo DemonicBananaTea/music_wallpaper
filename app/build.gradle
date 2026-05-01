@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android' // ДОДАЙ ЦЕ
+version '1.8.20'
 }
 
 android {
