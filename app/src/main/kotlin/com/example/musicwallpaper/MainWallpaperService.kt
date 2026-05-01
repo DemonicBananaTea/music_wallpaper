@@ -119,39 +119,32 @@ class MainWallpaperService : WallpaperService() {
 }
 
         private fun blurAndDarkenSafe(src: Bitmap): Bitmap {
-            val safeSrc = try {
-                if (src.config != null) {
-                    src.copy(src.config, true)
-                } else {
-                    src.copy(Bitmap.Config.ARGB_8888, true)
-                }
-            } catch (e: Exception) {
-                return src
-            }
+    val bitmap = src.copy(Bitmap.Config.ARGB_8888, true)
 
-            val scaled = Bitmap.createScaledBitmap(safeSrc, 100, 100, true)
+    val canvas = Canvas(bitmap)
 
-            val result = Bitmap.createScaledBitmap(
-                scaled,
-                src.width,
-                src.height,
-                true
-            )
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+        val paint = Paint()
 
-            val canvas = Canvas(result)
+        paint.renderEffect = RenderEffect.createBlurEffect(
+            60f, 60f, Shader.TileMode.CLAMP
+        )
 
-            val paint = Paint().apply {
-                color = Color.argb((0.3f * 255).toInt(), 0, 0, 0)
-            }
+        canvas.drawBitmap(bitmap, 0f, 0f, paint)
+    }
 
-            canvas.drawRect(
-                0f, 0f,
-                result.width.toFloat(),
-                result.height.toFloat(),
-                paint
-            )
+    val darkPaint = Paint().apply {
+        color = Color.argb(120, 0, 0, 0)
+    }
 
-            return result
-        }
+    canvas.drawRect(
+        0f, 0f,
+        bitmap.width.toFloat(),
+        bitmap.height.toFloat(),
+        darkPaint
+    )
+
+    return bitmap
+}
     }
 }
