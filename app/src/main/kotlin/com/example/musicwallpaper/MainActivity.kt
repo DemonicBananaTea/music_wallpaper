@@ -10,13 +10,12 @@ class MainActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val btn = Button(this)
-        btn.text = "Вибрати застосунки"
+        setContentView(R.layout.activity_main)
+
+        val btn = findViewById<Button>(R.id.openSettings)
 
         btn.setOnClickListener {
             startActivity(Intent(this, AppSelectActivity::class.java))
         }
-
-        setContentView(btn)
     }
 }
