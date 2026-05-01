@@ -4,9 +4,6 @@ import android.service.wallpaper.WallpaperService
 import android.view.SurfaceHolder
 import android.graphics.*
 import android.os.*
-import android.graphics.RenderEffect
-import android.graphics.Shader
-import android.graphics.Canvas
 
 class MainWallpaperService : WallpaperService() {
 
@@ -16,6 +13,8 @@ class MainWallpaperService : WallpaperService() {
 
         private val handler = Handler(Looper.getMainLooper())
         private var running = false
+
+        private lateinit var mediaSession: MediaSessionListener
 
         private var currentBitmap: Bitmap? = null
         private var previousBitmap: Bitmap? = null
@@ -32,6 +31,10 @@ class MainWallpaperService : WallpaperService() {
 
         override fun onCreate(holder: SurfaceHolder) {
             super.onCreate(holder)
+
+            mediaSession = MediaSessionListener(applicationContext)
+            mediaSession.start()
+
             running = true
         }
 
@@ -53,19 +56,23 @@ class MainWallpaperService : WallpaperService() {
 
         private fun drawFrame() {
             val holder = surfaceHolder
-
             if (!holder.surface.isValid) return
 
             val canvas = holder.lockCanvas() ?: return
 
             try {
-                val now = System.currentTimeMillis()
                 val newBmp = ArtworkStore.currentBitmap
 
-                if (newBmp != null && newBmp != currentBitmap) {
-                    previousBitmap = currentBitmap
-                    currentBitmap = blurAndDarkenSafe(newBmp)
-                    transitionProgress = 0f
+                // ❗ якщо музика не грає — чистимо фон
+                if (!mediaSession.isMusicPlaying()) {
+                    currentBitmap = null
+                    previousBitmap = null
+                } else {
+                    if (newBmp != null && newBmp != currentBitmap) {
+                        previousBitmap = currentBitmap
+                        currentBitmap = blurAndDarkenSafe(newBmp)
+                        transitionProgress = 0f
+                    }
                 }
 
                 canvas.drawColor(Color.BLACK)
@@ -83,73 +90,60 @@ class MainWallpaperService : WallpaperService() {
                     }
                 }
 
-            } catch (e: Exception) {
-                // щоб не падав wallpaper через один збій
-                e.printStackTrace()
             } finally {
                 try {
                     holder.unlockCanvasAndPost(canvas)
-                } catch (_: Exception) {
-                    // ignore surface already destroyed
-                }
+                } catch (_: Exception) {}
             }
         }
 
         private fun drawBitmap(canvas: Canvas, bitmap: Bitmap, alpha: Float) {
-    val paint = Paint().apply {
-        this.alpha = (alpha * 255).toInt()
-    }
+            val paint = Paint().apply {
+                this.alpha = (alpha * 255).toInt().coerceIn(0, 255)
+            }
 
-    val canvasRatio = canvas.width.toFloat() / canvas.height
-    val bitmapRatio = bitmap.width.toFloat() / bitmap.height
+            val canvasRatio = canvas.width.toFloat() / canvas.height
+            val bitmapRatio = bitmap.width.toFloat() / bitmap.height
 
-    val srcRect: Rect
-    val dstRect = Rect(0, 0, canvas.width, canvas.height)
+            val srcRect: Rect
+            val dstRect = Rect(0, 0, canvas.width, canvas.height)
 
-    if (bitmapRatio > canvasRatio) {
-        // bitmap ширший → обрізаємо по ширині
-        val newWidth = (bitmap.height * canvasRatio).toInt()
-        val xOffset = (bitmap.width - newWidth) / 2
-        srcRect = Rect(xOffset, 0, xOffset + newWidth, bitmap.height)
-    } else {
-        // bitmap вищий → обрізаємо по висоті
-        val newHeight = (bitmap.width / canvasRatio).toInt()
-        val yOffset = (bitmap.height - newHeight) / 2
-        srcRect = Rect(0, yOffset, bitmap.width, yOffset + newHeight)
-    }
+            if (bitmapRatio > canvasRatio) {
+                val newWidth = (bitmap.height * canvasRatio).toInt()
+                val xOffset = (bitmap.width - newWidth) / 2
+                srcRect = Rect(xOffset, 0, xOffset + newWidth, bitmap.height)
+            } else {
+                val newHeight = (bitmap.width / canvasRatio).toInt()
+                val yOffset = (bitmap.height - newHeight) / 2
+                srcRect = Rect(0, yOffset, bitmap.width, yOffset + newHeight)
+            }
 
-    canvas.drawBitmap(bitmap, srcRect, dstRect, paint)
-}
+            canvas.drawBitmap(bitmap, srcRect, dstRect, paint)
+        }
 
         private fun blurAndDarkenSafe(src: Bitmap): Bitmap {
-    val bitmap = src.copy(Bitmap.Config.ARGB_8888, true)
+            val bitmap = src.copy(Bitmap.Config.ARGB_8888, true)
 
-    // простий багатошаровий blur ефект
-    val canvas = Canvas(bitmap)
-    val paint = Paint()
+            val canvas = Canvas(bitmap)
 
-    // багаторазове накладання з оффсетом = “blur”
-    for (i in 1..6) {
-        paint.alpha = 40
-        canvas.drawBitmap(bitmap, i.toFloat(), i.toFloat(), paint)
-        canvas.drawBitmap(bitmap, -i.toFloat(), i.toFloat(), paint)
-        canvas.drawBitmap(bitmap, i.toFloat(), -i.toFloat(), paint)
-        canvas.drawBitmap(bitmap, -i.toFloat(), -i.toFloat(), paint)
-    }
+            val paint = Paint()
 
-    // затемнення
-    val darkPaint = Paint().apply {
-        color = Color.argb(140, 0, 0, 0)
-    }
+            // fake blur (працює всюди)
+            for (i in 1..5) {
+                paint.alpha = 30
+                canvas.drawBitmap(bitmap, i.toFloat(), i.toFloat(), paint)
+                canvas.drawBitmap(bitmap, -i.toFloat(), i.toFloat(), paint)
+                canvas.drawBitmap(bitmap, i.toFloat(), -i.toFloat(), paint)
+                canvas.drawBitmap(bitmap, -i.toFloat(), -i.toFloat(), paint)
+            }
 
-    canvas.drawRect(
-        0f, 0f,
-        bitmap.width.toFloat(),
-        bitmap.height.toFloat(),
-        darkPaint
-    )
+            val dark = Paint().apply {
+                color = Color.argb(140, 0, 0, 0)
+            }
 
-    return bitmap
-}
+            canvas.drawRect(0f, 0f, bitmap.width.toFloat(), bitmap.height.toFloat(), dark)
+
+            return bitmap
+        }
     }
 }

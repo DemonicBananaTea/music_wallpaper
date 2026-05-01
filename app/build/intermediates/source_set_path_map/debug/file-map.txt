@@ -1,8 +1,0 @@
-com.example.musicwallpaper.app-pngs-0 /data/data/com.termux/files/home/MusicWallpaper/app/build/generated/res/pngs/debug
-com.example.musicwallpaper.app-resValues-1 /data/data/com.termux/files/home/MusicWallpaper/app/build/generated/res/resValues/debug
-com.example.musicwallpaper.app-rs-2 /data/data/com.termux/files/home/MusicWallpaper/app/build/generated/res/rs/debug
-com.example.musicwallpaper.app-mergeDebugResources-3 /data/data/com.termux/files/home/MusicWallpaper/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir
-com.example.musicwallpaper.app-mergeDebugResources-4 /data/data/com.termux/files/home/MusicWallpaper/app/build/intermediates/incremental/debug/mergeDebugResources/stripped.dir
-com.example.musicwallpaper.app-merged_res-5 /data/data/com.termux/files/home/MusicWallpaper/app/build/intermediates/merged_res/debug
-com.example.musicwallpaper.app-debug-6 /data/data/com.termux/files/home/MusicWallpaper/app/src/debug/res
-com.example.musicwallpaper.app-main-7 /data/data/com.termux/files/home/MusicWallpaper/app/src/main/res
