@@ -5,7 +5,7 @@ import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
 import android.service.wallpaper.WallpaperService
-import android.view.SurfaceHolde
+import android.view.SurfaceHolder
 import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.graphics.Paint
@@ -108,6 +108,17 @@ class MainWallpaperService : WallpaperService() {
                 left + scaledW,
                 top + scaledH
             )
+            
+            val paint = Paint()
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                paint.setRenderEffect(
+                RenderEffect.createBlurEffect(
+                40f, 40f,
+                Shader.TileMode.CLAMP
+        )
+    )
+}
 
             // 🔥 BLUR (Android 12+)
             if (android.os.Build.VERSION.SDK_INT >= 31) {
@@ -119,7 +130,7 @@ class MainWallpaperService : WallpaperService() {
                 }
             }
 
-            canvas.drawBitmap(bmp, null, dst, null)
+            canvas.drawBitmap(bmp, null, dst, paint)
 
             // ❗ вимикаємо blur для наступних кадрів
             if (android.os.Build.VERSION.SDK_INT >= 31) {
