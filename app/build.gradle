@@ -1,0 +1,22 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.example.musicwallpaper'
+    compileSdk 33
+
+    defaultConfig {
+        applicationId "com.example.musicwallpaper"
+        minSdk 26
+        targetSdk 33
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+}
+
+dependencies {}
