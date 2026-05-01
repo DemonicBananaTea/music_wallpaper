@@ -5,24 +5,20 @@ import android.service.notification.StatusBarNotification
 import android.graphics.Bitmap
 
 class MusicListenerService : NotificationListenerService() {
+override fun onNotificationPosted(sbn: StatusBarNotification) {
 
-    override fun onNotificationPosted(sbn: StatusBarNotification) {
+    val extras = sbn.notification?.extras ?: return
 
-        val notification = sbn.notification ?: return
-        val extras = notification.extras ?: return
+    val bitmap =
+        extras.getParcelable<Bitmap>("android.largeIcon")
+            ?: extras.getParcelable("android.largeIcon")
+            ?: sbn.notification?.getLargeIcon()
+                ?.loadDrawable(this)
+                ?.let { Utils.drawableToBitmap(it) }
 
-        val title = extras.getString("android.title")
-        val artist = extras.getString("android.text")
-
-        val largeIcon = notification.getLargeIcon()
-
-        val bitmap: Bitmap? = largeIcon?.loadDrawable(this)?.let {
-            Utils.drawableToBitmap(it)
-        }
-
-        if (bitmap != null) {
-            ArtworkStore.currentBitmap = bitmap
-            ArtworkStore.lastUpdateTime = System.currentTimeMillis()
-        }
+    if (bitmap != null) {
+        ArtworkStore.currentBitmap = bitmap
+        ArtworkStore.lastUpdateTime = System.currentTimeMillis()
     }
+}
 }
