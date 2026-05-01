@@ -17,7 +17,8 @@ class MediaSessionReader(private val context: Context) {
         val allowed = Settings.getAllowedApps(context)
 
         val sessions = manager.getActiveSessions(component)
-
+android.util.Log.e("MEDIA", "sessions: ${sessions.map { it.packageName }}")
+android.util.Log.e("MEDIA", "allowed: $allowed")
         // 🔥 шукаємо сесію тільки серед обраних застосунків
         val controller = sessions.firstOrNull { session ->
             allowed.contains(session.packageName)

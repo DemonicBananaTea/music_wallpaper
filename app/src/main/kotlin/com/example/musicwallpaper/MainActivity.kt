@@ -10,13 +10,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val btn = Button(this)
-        btn.text = "Вибрати застосунки"
-
-        btn.setOnClickListener {
-            startActivity(Intent(this, AppSelectActivity::class.java))
-        }
-
-        setContentView(btn)
+        startActivity(Intent(this, AppSelectActivity::class.java))
     }
 }
