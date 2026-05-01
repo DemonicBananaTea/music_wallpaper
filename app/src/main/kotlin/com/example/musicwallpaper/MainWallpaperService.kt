@@ -70,7 +70,7 @@ class MainWallpaperService : WallpaperService() {
                     previousBitmap = null
                 }
 
-                canvas.drawColor(Color.BLACK)
+                canvas.drawColor(Color.RED)
 
                 val curr = currentBitmap
                 val prev = previousBitmap
