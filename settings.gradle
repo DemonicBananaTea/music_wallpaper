@@ -1,2 +1,10 @@
 rootProject.name = "MusicWallpaper"
 include ':app'
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
