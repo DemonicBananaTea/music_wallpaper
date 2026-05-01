@@ -16,10 +16,7 @@ class MediaSessionReader(private val context: Context) {
 
     val allowedApps = Settings.getAllowedApps(context)
 
-if (allowedApps.isNotEmpty() && !allowedApps.contains(packageName)) {
-    ArtworkStore.bitmap = null
-    return
-}
+
    fun update() {
     try {
         val sessions = manager.getActiveSessions(component)
@@ -28,10 +25,10 @@ if (allowedApps.isNotEmpty() && !allowedApps.contains(packageName)) {
 
         val packageName = controller.packageName
 
-        if (!allowedApps.contains(packageName)) {
-            ArtworkStore.bitmap = null
-            return
-        }
+        if (allowedApps.isNotEmpty() && !allowedApps.contains(packageName)) {
+    ArtworkStore.bitmap = null
+    return
+}
 
         val bmp = controller.metadata?.description?.iconBitmap
 
