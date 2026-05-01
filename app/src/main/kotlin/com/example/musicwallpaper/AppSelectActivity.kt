@@ -17,7 +17,9 @@ class AppSelectActivity : AppCompatActivity() {
 
         val pm = packageManager
 
-        val installed = pm.getInstalledApplications(PackageManager.GET_META_DATA)
+        val intent = Intent(Intent.ACTION_MAIN, null) intent.addCategory(Intent.CATEGORY_LAUNCHER)
+
+        val installed = pm.queryIntentActivities(intent, 0)
 
         val saved = Settings.getAllowedApps(this)
 
@@ -40,6 +42,23 @@ class AppSelectActivity : AppCompatActivity() {
 
         recycler.adapter = adapter
     }
+    
+    private fun getUserApps(context: Context): List<AppItem> {
+    val pm = context.packageManager
+
+    val intent = Intent(Intent.ACTION_MAIN, null)
+    intent.addCategory(Intent.CATEGORY_LAUNCHER)
+
+    val apps = pm.queryIntentActivities(intent, 0)
+
+    return apps.map {
+        AppItem(
+            packageName = it.activityInfo.packageName,
+            label = it.loadLabel(pm).toString()
+        )
+    }.sortedBy { it.label }
+}
+    
     override fun onResume() {
     super.onResume()
     android.util.Log.e("APP_SELECT", "RESUMED")

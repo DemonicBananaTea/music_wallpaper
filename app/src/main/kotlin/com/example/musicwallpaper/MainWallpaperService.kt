@@ -52,7 +52,7 @@ class MainWallpaperService : WallpaperService() {
             try {
                 canvas.drawColor(Color.BLACK)
 
-                ArtworkStore.bitmap?.let { bmp ->
+                ArtworkStore.currentBitmap?.let { bmp ->
                     val dst = Rect(0, 0, canvas.width, canvas.height)
                     canvas.drawBitmap(bmp, null, dst, Paint())
                 }
