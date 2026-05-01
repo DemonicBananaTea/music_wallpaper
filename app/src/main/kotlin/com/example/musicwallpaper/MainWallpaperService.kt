@@ -4,6 +4,9 @@ import android.service.wallpaper.WallpaperService
 import android.view.SurfaceHolder
 import android.graphics.*
 import android.os.*
+import android.graphics.RenderEffect
+import android.graphics.Shader
+import android.graphics.Canvas
 
 class MainWallpaperService : WallpaperService() {
 
