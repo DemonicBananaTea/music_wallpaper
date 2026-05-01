@@ -6,8 +6,6 @@ import android.os.Handler
 import android.os.Looper
 import android.service.wallpaper.WallpaperService
 import android.view.SurfaceHolder
-import android.graphics.RenderEffect
-import android.graphics.Shader
 import android.graphics.Paint
 import android.graphics.RectF
 import android.os.Build
@@ -87,17 +85,12 @@ class MainWallpaperService : WallpaperService() {
     )
 
     val canvas = Canvas(bitmap)
-    val paint = Paint()
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
-    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-        paint.renderEffect = android.graphics.RenderEffect.createBlurEffect(
-            radius,
-            radius,
-            android.graphics.Shader.TileMode.CLAMP
-        )
-    }
-
+    // ❗ простий варіант (без RenderEffect)
+    // поки що просто малюємо як є
     canvas.drawBitmap(src, 0f, 0f, paint)
+
     return bitmap
 }
 
@@ -126,33 +119,23 @@ class MainWallpaperService : WallpaperService() {
             val left = (canvasW - scaledW) / 2f
             val top = (canvasH - scaledH) / 2f
 
-            val dst = android.graphics.RectF(
+            val dst = RectF(
                 left,
                 top,
                 left + scaledW,
                 top + scaledH
             )
 
-            // 🔥 BLUR БІТМЕПА
-            val blurred = if (android.os.Build.VERSION.SDK_INT >= 31) {
-                blurBitmap(bmp, 40f)
-            } else {
-                bmp
-            }
+            val displayed = blurBitmap(bmp, 40f)
 
-            canvas.drawBitmap(blurred, null, dst, null)
+            canvas.drawBitmap(displayed, null, dst, null)
 
-            // 🔥 затемнення 30%
             val darkPaint = Paint().apply {
                 color = Color.BLACK
                 alpha = (255 * 0.30f).toInt()
             }
 
-            canvas.drawRect(
-                0f, 0f,
-                canvasW, canvasH,
-                darkPaint
-            )
+            canvas.drawRect(0f, 0f, canvasW, canvasH, darkPaint)
         }
 
     } finally {
