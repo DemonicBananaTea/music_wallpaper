@@ -103,14 +103,13 @@ class MainWallpaperService : WallpaperService() {
 
                     val paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
-                    // 🔥 GPU BLUR (правильний спосіб)
+                    // 🔥 GPU blur (Android 12+)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        paint.renderEffect =
-                            RenderEffect.createBlurEffect(
-                                60f,
-                                60f,
-                                Shader.TileMode.CLAMP
-                            )
+                        paint.renderEffect = RenderEffect.createBlurEffect(
+                            60f,
+                            60f,
+                            Shader.TileMode.CLAMP
+                        )
                     }
 
                     canvas.drawBitmap(bmp, null, dst, paint)
