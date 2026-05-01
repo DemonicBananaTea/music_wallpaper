@@ -61,10 +61,15 @@ class MainWallpaperService : WallpaperService() {
             val canvas = holder.lockCanvas() ?: return
 
             try {
-                val newBmp = ArtworkStore.currentBitmap
+                val now = System.currentTimeMillis()
 
-                // ❗ якщо музика не грає — чистимо фон
-                if (!mediaSession.isMusicPlaying()) {
+                // safe read (anti race condition)
+                val newBmp = ArtworkStore.currentBitmap?.copy(Bitmap.Config.ARGB_8888, false)
+
+                // ⏱ idle timeout (єдине джерело очищення)
+                val timeout = now - ArtworkStore.lastUpdateTime > 5000
+
+                if (timeout) {
                     currentBitmap = null
                     previousBitmap = null
                 } else {
@@ -90,14 +95,22 @@ class MainWallpaperService : WallpaperService() {
                     }
                 }
 
+            } catch (e: Exception) {
+                e.printStackTrace()
             } finally {
                 try {
                     holder.unlockCanvasAndPost(canvas)
-                } catch (_: Exception) {}
+                } catch (_: Exception) {
+                    // ignore surface crash
+                }
             }
         }
 
         private fun drawBitmap(canvas: Canvas, bitmap: Bitmap, alpha: Float) {
+
+            if (bitmap.isRecycled) return
+            if (bitmap.width <= 0 || bitmap.height <= 0) return
+
             val paint = Paint().apply {
                 this.alpha = (alpha * 255).toInt().coerceIn(0, 255)
             }
@@ -122,15 +135,17 @@ class MainWallpaperService : WallpaperService() {
         }
 
         private fun blurAndDarkenSafe(src: Bitmap): Bitmap {
-            val bitmap = src.copy(Bitmap.Config.ARGB_8888, true)
 
+            // downscale for safety (avoids OOM)
+            val safeSrc = Bitmap.createScaledBitmap(src, 300, 300, true)
+
+            val bitmap = safeSrc.copy(Bitmap.Config.ARGB_8888, true)
             val canvas = Canvas(bitmap)
-
             val paint = Paint()
 
-            // fake blur (працює всюди)
-            for (i in 1..5) {
-                paint.alpha = 30
+            // fake blur (stable across all Android versions)
+            for (i in 1..4) {
+                paint.alpha = 25
                 canvas.drawBitmap(bitmap, i.toFloat(), i.toFloat(), paint)
                 canvas.drawBitmap(bitmap, -i.toFloat(), i.toFloat(), paint)
                 canvas.drawBitmap(bitmap, i.toFloat(), -i.toFloat(), paint)
@@ -141,7 +156,12 @@ class MainWallpaperService : WallpaperService() {
                 color = Color.argb(140, 0, 0, 0)
             }
 
-            canvas.drawRect(0f, 0f, bitmap.width.toFloat(), bitmap.height.toFloat(), dark)
+            canvas.drawRect(
+                0f, 0f,
+                bitmap.width.toFloat(),
+                bitmap.height.toFloat(),
+                dark
+            )
 
             return bitmap
         }

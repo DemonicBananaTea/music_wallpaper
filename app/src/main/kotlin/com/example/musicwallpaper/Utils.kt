@@ -5,12 +5,17 @@ import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 
 object Utils {
+
     fun drawableToBitmap(drawable: Drawable): Bitmap {
-        val bitmap = Bitmap.createBitmap(
-            drawable.intrinsicWidth.coerceAtLeast(1),
-            drawable.intrinsicHeight.coerceAtLeast(1),
-            Bitmap.Config.ARGB_8888
-        )
+        // якщо це вже BitmapDrawable — просто беремо bitmap
+        if (drawable is android.graphics.drawable.BitmapDrawable) {
+            drawable.bitmap?.let { return it.copy(Bitmap.Config.ARGB_8888, true) }
+        }
+
+        val width = if (drawable.intrinsicWidth > 0) drawable.intrinsicWidth else 512
+        val height = if (drawable.intrinsicHeight > 0) drawable.intrinsicHeight else 512
+
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
 
         val canvas = Canvas(bitmap)
         drawable.setBounds(0, 0, canvas.width, canvas.height)

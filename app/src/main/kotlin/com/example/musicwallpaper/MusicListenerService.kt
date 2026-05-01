@@ -1,24 +1,39 @@
 package com.example.musicwallpaper
 
+import android.graphics.Bitmap
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
-import android.graphics.Bitmap
 
 class MusicListenerService : NotificationListenerService() {
-override fun onNotificationPosted(sbn: StatusBarNotification) {
 
-    val extras = sbn.notification?.extras ?: return
+    override fun onNotificationPosted(sbn: StatusBarNotification) {
 
-    val bitmap =
-        extras.getParcelable<Bitmap>("android.largeIcon")
-            ?: extras.getParcelable("android.largeIcon")
-            ?: sbn.notification?.getLargeIcon()
-                ?.loadDrawable(this)
-                ?.let { Utils.drawableToBitmap(it) }
+        try {
+            val extras = sbn.notification?.extras ?: return
 
-    if (bitmap != null) {
-        ArtworkStore.currentBitmap = bitmap
-        ArtworkStore.lastUpdateTime = System.currentTimeMillis()
+            val bitmap: Bitmap? =
+                extras.getParcelable("android.largeIcon")
+                    ?: extras.getParcelable("android.picture")
+                    ?: sbn.notification?.getLargeIcon()
+                        ?.loadDrawable(this)
+                        ?.let { Utils.drawableToBitmap(it) }
+
+            // 🧠 тільки базова перевірка (без фільтрів)
+            if (bitmap != null &&
+                bitmap.width > 50 &&
+                bitmap.height > 50
+            ) {
+                ArtworkStore.currentBitmap = bitmap
+                ArtworkStore.lastUpdateTime = System.currentTimeMillis()
+            }
+
+        } catch (e: Exception) {
+            // ❗ ніколи не даємо listener'у падати
+            e.printStackTrace()
+        }
     }
-}
+
+    override fun onNotificationRemoved(sbn: StatusBarNotification) {
+        // нічого не робимо — чиста логіка
+    }
 }
