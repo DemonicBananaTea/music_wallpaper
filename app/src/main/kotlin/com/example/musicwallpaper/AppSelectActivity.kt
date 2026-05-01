@@ -11,39 +11,41 @@ import androidx.recyclerview.widget.RecyclerView
 class AppSelectActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_app_select)
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_app_select)
 
-        val recycler = findViewById<RecyclerView>(R.id.recycler)
-        recycler.layoutManager = LinearLayoutManager(this)
+    val recycler = findViewById<RecyclerView>(R.id.recycler)
+    recycler.layoutManager = LinearLayoutManager(this)
 
-        val pm = packageManager
+    val pm = packageManager
 
-        val intent = Intent(Intent.ACTION_MAIN, null) intent.addCategory(Intent.CATEGORY_LAUNCHER)
+    val intent = Intent(Intent.ACTION_MAIN, null)
+    intent.addCategory(Intent.CATEGORY_LAUNCHER)
 
-        val installed = pm.queryIntentActivities(intent, 0)
+    val installed = pm.queryIntentActivities(intent, 0)
 
-        val saved = Settings.getAllowedApps(this)
+    val saved = Settings.getAllowedApps(this)
 
-        val items = installed.map {
+    val items = installed.map {
         val ai = it.activityInfo
-            AppItem(
-                label = it.loadLabel(pm).toString(),
-                packageName = ai.packageName,
-                selected = saved.contains(ai.packageName)
-            )
-        }
 
-        val adapter = AppAdapter(items) { updated ->
-            val selected = updated
-                .filter { it.selected }
-                .map { it.packageName }
-                .toSet()
+        AppItem(
+            label = it.loadLabel(pm).toString(),
+            packageName = ai.packageName,
+            selected = saved.contains(ai.packageName)
+        )
+    }.sortedBy { it.label.lowercase() }
 
-            Settings.setAllowedApps(this, selected)
-        }
+    val adapter = AppAdapter(items) { updated ->
+        val selected = updated
+            .filter { it.selected }
+            .map { it.packageName }
+            .toSet()
 
-        recycler.adapter = adapter
+        Settings.setAllowedApps(this, selected)
+    }
+
+    recycler.adapter = adapter
     }
     
     private fun getUserApps(context: Context): List<AppItem> {
