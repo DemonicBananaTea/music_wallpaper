@@ -15,26 +15,28 @@ class MediaSessionReader(private val context: Context) {
         ComponentName(context, DummyNotificationListener::class.java)
 
     fun update() {
-        try {
-            val allowed = Settings.getAllowedApps(context)
+    try {
+        val allowed = Settings.getAllowedApps(context)
 
-            val sessions = manager.getActiveSessions(component)
+        val sessions = manager.getActiveSessions(component)
 
-            val controller = sessions.firstOrNull { session ->
-                allowed.contains(session.packageName)
-            } ?: run {
-                ArtworkStore.currentBitmap = null
-                ArtworkStore.lastUpdateTime = System.currentTimeMillis()
-                return
-            }
+        val controller = sessions
+            .filter { allowed.contains(it.packageName) }
+            .firstOrNull()
 
-            val bmp = controller.metadata?.description?.iconBitmap
+        if (controller == null) {
+            ArtworkStore.currentBitmap = null
+            ArtworkStore.lastUpdateTime = System.currentTimeMillis()
+            return
+        }
 
-            if (bmp != null) {
-                ArtworkStore.currentBitmap = bmp
-                ArtworkStore.lastUpdateTime = System.currentTimeMillis()
-            }
+        val bmp = controller.metadata?.description?.iconBitmap
 
-        } catch (_: Exception) {}
-    }
+        if (bmp != null) {
+            ArtworkStore.currentBitmap = bmp
+            ArtworkStore.lastUpdateTime = System.currentTimeMillis()
+        }
+
+    } catch (_: Exception) {}
+}
 }

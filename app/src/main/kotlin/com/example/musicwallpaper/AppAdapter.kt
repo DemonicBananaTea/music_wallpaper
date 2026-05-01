@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 
 class AppAdapter(
-    private val items: List<AppItem>,
+    private var items: List<AppItem>,
     private val onChanged: (List<AppItem>) -> Unit
 ) : RecyclerView.Adapter<AppAdapter.VH>() {
 
@@ -25,8 +25,15 @@ class AppAdapter(
         holder.checkBox.setOnCheckedChangeListener(null)
 
         holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
-            item.selected = isChecked
-            onChanged(items)
+
+            val newList = items.map {
+                if (it.packageName == item.packageName)
+                    it.copy(selected = isChecked)
+                else it
+            }
+
+            items = newList
+            onChanged(newList)
         }
     }
 
