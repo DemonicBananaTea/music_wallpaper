@@ -2,7 +2,7 @@
     package="com.example.musicwallpaper">
 
     <application>
-
+android:theme="@android:style/Theme.Material.Light.NoActionBar"
         <service
             android:name=".MainWallpaperService"
             android:permission="android.permission.BIND_WALLPAPER"
