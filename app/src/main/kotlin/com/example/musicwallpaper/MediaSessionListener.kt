@@ -9,49 +9,42 @@ import android.util.Log
 
 class MediaSessionListener(private val context: Context) {
 
-    private val mediaSessionManager =
+    private val manager =
         context.getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
 
-    private var isPlaying = false
-    private var activePackage: String? = null
-
     fun start() {
-        val component = ComponentName(context, DummyNotificationListener::class.java)
+        try {
+            val component = ComponentName(context, DummyNotificationListener::class.java)
 
-        mediaSessionManager.addOnActiveSessionsChangedListener(
-            listener,
-            component
-        )
+            manager.addOnActiveSessionsChangedListener(
+                { controllers -> safeUpdate(controllers) },
+                component
+            )
 
-        Log.e("MEDIA", "STARTED")
-    }
+            Log.e("MEDIA", "STARTED")
 
-    private val listener =
-        MediaSessionManager.OnActiveSessionsChangedListener { controllers ->
-            update(controllers)
-        }
-
-    private fun update(controllers: List<MediaController>?) {
-        if (controllers.isNullOrEmpty()) {
-            isPlaying = false
-            activePackage = null
-            return
-        }
-
-        val controller = controllers.firstOrNull()
-        val state = controller?.playbackState?.state
-
-        isPlaying = state == PlaybackState.STATE_PLAYING
-        activePackage = controller?.packageName
-
-        Log.e("MEDIA", "PLAYING=$isPlaying PACKAGE=$activePackage")
-
-        val art = controller?.metadata?.description?.iconBitmap
-        if (art != null) {
-            ArtworkStore.bitmap = art
-            Log.e("MEDIA", "ART UPDATED")
+        } catch (e: Exception) {
+            Log.e("MEDIA", "FAILED", e)
         }
     }
 
-    fun isPlaying(): Boolean = isPlaying
+    private fun safeUpdate(controllers: List<MediaController>?) {
+        try {
+            val c = controllers?.firstOrNull() ?: return
+
+            val state = c.playbackState?.state ?: return
+            val playing = state == PlaybackState.STATE_PLAYING
+
+            Log.e("MEDIA", "PLAYING=$playing")
+
+            val bmp = c.metadata?.description?.iconBitmap
+
+            if (playing && bmp != null) {
+                ArtworkStore.set(bmp)
+            }
+
+        } catch (e: Exception) {
+            Log.e("MEDIA", "UPDATE ERROR", e)
+        }
+    }
 }
