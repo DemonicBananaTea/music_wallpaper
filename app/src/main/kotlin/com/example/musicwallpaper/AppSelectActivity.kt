@@ -64,9 +64,9 @@ class AppSelectActivity : AppCompatActivity() {
         AppItem(
             packageName = pkg,
             label = it.loadLabel(pm).toString(),
-            selected = saved.contains(pkg)   // 💥 ОЦЕ ВАЖЛИВО
+            selected = saved.contains(pkg)
         )
-    }.sortedBy { it.label }
+    }.sortedBy { it.label.lowercase() }
 }
     
     override fun onResume() {
