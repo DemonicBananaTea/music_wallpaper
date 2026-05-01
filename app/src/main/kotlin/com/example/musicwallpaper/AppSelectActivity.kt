@@ -10,14 +10,30 @@ import androidx.recyclerview.widget.RecyclerView
 class AppSelectActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
+        super.onCreate(savedInstanceState)
 
-    val tv = android.widget.TextView(this)
-    tv.text = "TEST SCREEN 123"
-    tv.textSize = 30f
+        val recycler = RecyclerView(this)
+        recycler.layoutManager = LinearLayoutManager(this)
+        setContentView(recycler)
 
-    setContentView(tv)
+        val pm = packageManager
 
-    android.util.Log.e("APP_SELECT", "TEST SCREEN OPENED")
-}
+        val intent = Intent(Intent.ACTION_MAIN).apply {
+            addCategory(Intent.CATEGORY_LAUNCHER)
+        }
+
+        val apps = pm.queryIntentActivities(intent, 0)
+
+        val items = apps.map {
+            AppItem(
+                label = it.loadLabel(pm).toString(),
+                packageName = it.activityInfo.packageName,
+                selected = false
+            )
+        }.sortedBy { it.label.lowercase() }
+
+        Log.e("APPS", "COUNT = ${items.size}")
+
+        recycler.adapter = AppAdapter(items) {}
+    }
 }
