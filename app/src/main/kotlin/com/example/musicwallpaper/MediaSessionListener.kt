@@ -1,5 +1,6 @@
 package com.example.musicwallpaper
 
+import android.util.Log
 import android.content.ComponentName
 import android.content.Context
 import android.media.session.MediaSessionManager
