@@ -15,22 +15,18 @@ class MediaSessionReader(private val context: Context) {
     fun update() {
 
         val allowed = Settings.getAllowedApps(context)
-
         val sessions = manager.getActiveSessions(component)
 
-        // 🔥 шукаємо сесію тільки з ОБРАНИХ застосунків
-        val controller = sessions.firstOrNull { session ->
-            allowed.contains(session.packageName)
+        val active = sessions.firstOrNull {
+            it.packageName in allowed
         }
 
-        // ❌ якщо немає активної сесії для обраних apps
-        if (controller == null) {
+        if (active == null) {
             ArtworkStore.currentBitmap = null
             return
         }
 
-        // ✅ якщо є — беремо обкладинку
         ArtworkStore.currentBitmap =
-            controller.metadata?.description?.iconBitmap
+            active.metadata?.description?.iconBitmap
     }
 }

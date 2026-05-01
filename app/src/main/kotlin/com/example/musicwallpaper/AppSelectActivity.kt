@@ -1,8 +1,8 @@
 package com.example.musicwallpaper
 
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -22,11 +22,11 @@ class AppSelectActivity : AppCompatActivity() {
             addCategory(Intent.CATEGORY_LAUNCHER)
         }
 
-        val installed = pm.queryIntentActivities(intent, 0)
+        val apps = pm.queryIntentActivities(intent, 0)
 
         val saved = Settings.getAllowedApps(this)
 
-        val items = installed.map {
+        val items = apps.map {
             val pkg = it.activityInfo.packageName
 
             AppItem(
@@ -36,7 +36,7 @@ class AppSelectActivity : AppCompatActivity() {
             )
         }.sortedBy { it.label.lowercase() }
 
-        val adapter = AppAdapter(items) { updated ->
+        recycler.adapter = AppAdapter(items) { updated ->
             val selected = updated
                 .filter { it.selected }
                 .map { it.packageName }
@@ -44,12 +44,5 @@ class AppSelectActivity : AppCompatActivity() {
 
             Settings.setAllowedApps(this, selected)
         }
-
-        recycler.adapter = adapter
-    }
-
-    override fun onResume() {
-        super.onResume()
-        Log.e("APP_SELECT", "RESUMED")
     }
 }

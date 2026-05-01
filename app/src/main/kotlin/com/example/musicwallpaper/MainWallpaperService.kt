@@ -1,6 +1,9 @@
 package com.example.musicwallpaper
 
 import android.graphics.Canvas
+import android.graphics.Color
+import android.os.Handler
+import android.os.Looper
 import android.service.wallpaper.WallpaperService
 import android.view.SurfaceHolder
 
@@ -12,15 +15,31 @@ class MainWallpaperService : WallpaperService() {
 
     inner class MusicEngine : Engine() {
 
-        override fun onSurfaceCreated(holder: SurfaceHolder) {
-            super.onSurfaceCreated(holder)
-            drawFrame(holder)
+        private val handler = Handler(Looper.getMainLooper())
+        private var visible = false
+
+        private val frameRunnable = object : Runnable {
+            override fun run() {
+                if (visible) {
+                    drawFrame()
+                    handler.postDelayed(this, 1000L / 30L) // ~30 FPS
+                }
+            }
         }
 
-        override fun onVisibilityChanged(visible: Boolean) {
-            if (visible) {
-                drawFrame(surfaceHolder)
+        override fun onVisibilityChanged(isVisible: Boolean) {
+            visible = isVisible
+
+            if (isVisible) {
+                handler.post(frameRunnable)
+            } else {
+                handler.removeCallbacks(frameRunnable)
             }
+        }
+
+        override fun onSurfaceCreated(holder: SurfaceHolder) {
+            super.onSurfaceCreated(holder)
+            drawFrame()
         }
 
         override fun onSurfaceChanged(
@@ -30,18 +49,25 @@ class MainWallpaperService : WallpaperService() {
             height: Int
         ) {
             super.onSurfaceChanged(holder, format, width, height)
-            drawFrame(holder)
+            drawFrame()
         }
 
-        private fun drawFrame(holder: SurfaceHolder) {
+        override fun onDestroy() {
+            super.onDestroy()
+            handler.removeCallbacks(frameRunnable)
+        }
+
+        private fun drawFrame() {
+            val holder = surfaceHolder
             val canvas: Canvas = holder.lockCanvas() ?: return
 
             try {
                 val bmp = ArtworkStore.currentBitmap
 
                 if (bmp == null) {
-                    canvas.drawColor(android.graphics.Color.BLACK)
+                    canvas.drawColor(Color.BLACK)
                 } else {
+                    canvas.drawColor(Color.BLACK) // фон під картинкою
                     canvas.drawBitmap(bmp, 0f, 0f, null)
                 }
 
