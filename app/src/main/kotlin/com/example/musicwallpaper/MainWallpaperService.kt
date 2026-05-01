@@ -65,12 +65,7 @@ class MainWallpaperService : WallpaperService() {
                     transitionProgress = 0f
                 }
 
-                if (now - ArtworkStore.lastUpdateTime > 3000) {
-                    currentBitmap = null
-                    previousBitmap = null
-                }
-
-                canvas.drawColor(Color.RED)
+                canvas.drawColor(Color.BLACK)
 
                 val curr = currentBitmap
                 val prev = previousBitmap
@@ -117,7 +112,7 @@ class MainWallpaperService : WallpaperService() {
                 return src
             }
 
-            val scaled = Bitmap.createScaledBitmap(safeSrc, 100, 100, true)
+            val scaled = Bitmap.createScaledBitmap(safeSrc, 20, 20, true)
 
             val result = Bitmap.createScaledBitmap(
                 scaled,
