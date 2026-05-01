@@ -1,23 +1,22 @@
 package com.example.musicwallpaper
 
-import androidx.appcompat.app.AppCompatActivity
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import androidx.appcompat.app.AppCompatActivity
 
-class MainActivity : Activity() {
+class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_main)
+        val btn = Button(this)
+        btn.text = "Вибрати застосунки"
 
-        val btn = findViewById<Button>(R.id.openSettings)
-        
         btn.setOnClickListener {
-            it.post {
-                startActivity(Intent(this, AppSelectActivity::class.java))
-            }
+            startActivity(Intent(this, AppSelectActivity::class.java))
         }
+
+        setContentView(btn)
     }
 }
