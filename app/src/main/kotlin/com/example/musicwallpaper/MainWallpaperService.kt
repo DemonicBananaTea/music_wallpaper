@@ -103,7 +103,11 @@ class MainWallpaperService : WallpaperService() {
 
             canvas.drawRect(0f, 0f, w, h, dark)
         }
-        canvas.drawColor(Color.BLACK)
+        else
+        {
+            canvas.drawColor(Color.BLACK)
+        }
+        
 
     } finally {
         holder.unlockCanvasAndPost(canvas)
