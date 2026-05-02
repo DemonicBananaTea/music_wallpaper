@@ -4,6 +4,7 @@ import android.util.Log
 import android.content.ComponentName
 import android.content.Context
 import android.media.session.MediaSessionManager
+import android.support.v4.media.MediaMetadataCompat
 
 class MediaSessionReader(private val context: Context) {
 
