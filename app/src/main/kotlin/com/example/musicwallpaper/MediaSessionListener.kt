@@ -20,14 +20,20 @@ class MediaSessionReader(private val context: Context) {
         val controller = sessions.firstOrNull {
             allowed.contains(it.packageName)
         }
-
+        
         if (controller == null) {
             ArtworkStore.currentBitmap = null
             return
         }
-
+        
+        if (controller == controllerOld)
+        {
+            return
+        }
+        
         val bmp = controller.metadata?.description?.iconBitmap
 
         ArtworkStore.currentBitmap = bmp
+        val controllerOld = controllerOld
     }
 }
