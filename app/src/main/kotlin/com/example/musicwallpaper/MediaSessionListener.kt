@@ -43,7 +43,7 @@ class MediaSessionReader(private val context: Context) {
         // Використовуємо твій робочий спосіб отримання бітмапа
         val bmp = description?.iconBitmap
 
-        ArtworkStore.currentBitmap = bmp
+        ArtworkStore.currentBitmap = Blur.fastBlur(bmp, 0.25f, 12)
         lastTrackTitle = currentTitle
     }
 }
