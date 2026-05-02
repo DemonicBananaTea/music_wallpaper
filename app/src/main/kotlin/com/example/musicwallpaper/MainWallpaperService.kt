@@ -80,7 +80,7 @@ class MainWallpaperService : WallpaperService() {
         val w = canvas.width.toFloat()
         val h = canvas.height.toFloat()
 
-        canvas.drawColor(Color.BLACK)
+        
 
         if (bmp != null) {
 
@@ -98,11 +98,12 @@ class MainWallpaperService : WallpaperService() {
             // 🔥 затемнення 30%
             val dark = Paint().apply {
                 color = Color.BLACK
-                alpha = 77
+                alpha = 50
             }
 
             canvas.drawRect(0f, 0f, w, h, dark)
         }
+        canvas.drawColor(Color.BLACK)
 
     } finally {
         holder.unlockCanvasAndPost(canvas)
