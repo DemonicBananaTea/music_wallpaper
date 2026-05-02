@@ -69,20 +69,6 @@ class MainWallpaperService : WallpaperService() {
             handler.removeCallbacks(drawRunnable)
         }
 
-private fun blurBitmapFast(src: Bitmap): Bitmap {
-    val small = Bitmap.createScaledBitmap(
-        src,
-        src.width / 6,
-        src.height / 6,
-        true
-    )
-    return Bitmap.createScaledBitmap(
-        small,
-        src.width,
-        src.height,
-        true
-    )
-}
 
         private fun drawFrame() {
     val holder = surfaceHolder
@@ -98,18 +84,16 @@ private fun blurBitmapFast(src: Bitmap): Bitmap {
 
         if (bmp != null) {
 
-            val blurred = blurBitmapFast(bmp)
-
-            val scale = maxOf(w / blurred.width, h / blurred.height)
+            val scale = maxOf(w / bmp.width, h / bmp.height)
 
             val dst = RectF(
-                (w - blurred.width * scale) / 2f,
-                (h - blurred.height * scale) / 2f,
-                (w + blurred.width * scale) / 2f,
-                (h + blurred.height * scale) / 2f
+                (w - bmp.width * scale) / 2f,
+                (h - bmp.height * scale) / 2f,
+                (w + bmp.width * scale) / 2f,
+                (h + bmp.height * scale) / 2f
             )
 
-            canvas.drawBitmap(blurred, null, dst, null)
+            canvas.drawBitmap(bmp, null, dst, null)
 
             // 🔥 затемнення 30%
             val dark = Paint().apply {
