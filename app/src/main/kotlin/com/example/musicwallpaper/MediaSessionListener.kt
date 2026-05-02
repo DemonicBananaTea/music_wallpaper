@@ -5,52 +5,45 @@ import android.content.ComponentName
 import android.content.Context
 import android.media.session.MediaSessionManager
 import android.media.session.MediaController
-import android.media.session.MediaMetadata
 
 class MediaSessionReader(private val context: Context) {
 
     private val manager = context.getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
     private val component = ComponentName(context, DummyNotificationListener::class.java)
 
-    // Зберігаємо ID останнього обробленого треку
-    private var lastTrackId: String? = null
-    private var lastPackageName: String? = null
+    // Зберігаємо заголовок останнього треку, щоб не перемальовувати те саме
+    private var lastTrackTitle: String? = null
 
     fun update() {
         val allowed = Settings.getAllowedApps(context)
         val sessions = manager.getActiveSessions(component)
 
+        // Шукаємо перший дозволений контролер
         val controller = sessions.firstOrNull { allowed.contains(it.packageName) }
 
         if (controller == null) {
-            if (lastPackageName != null) {
+            if (lastTrackTitle != null) {
                 ArtworkStore.currentBitmap = null
-                lastTrackId = null
-                lastPackageName = null
+                lastTrackTitle = null
             }
             return
         }
 
-        val metadata = controller.metadata
-        // Отримуємо унікальний ID пісні або комбінацію назва+автор
-        val currentTrackId = metadata?.getString(MediaMetadata.METADATA_KEY_MEDIA_ID) 
-                             ?: metadata?.description?.title?.toString()
+        // Отримуємо опис (MediaDescription)
+        val description = controller.metadata?.description
+        val currentTitle = description?.title?.toString()
 
-        // ПОРІВНЯННЯ: якщо пакет той самий і ID пісні той самий — виходимо
-        if (controller.packageName == lastPackageName && currentTrackId == lastTrackId) {
+        // ПЕРЕВІРКА: якщо назва пісні та сама — ігноруємо оновлення
+        if (currentTitle == lastTrackTitle) {
             return
         }
 
-        Log.d("MediaReader", "Оновлюємо обкладинку для: $currentTrackId")
+        Log.d("MediaReader", "Новий трек: $currentTitle. Оновлюємо картинку.")
 
-        // Отримуємо бітмап (спробуй METADATA_KEY_ALBUM_ART для кращої якості)
-        val bmp = metadata?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART) 
-                  ?: metadata?.description?.iconBitmap
+        // Використовуємо твій робочий спосіб отримання бітмапа
+        val bmp = description?.iconBitmap
 
         ArtworkStore.currentBitmap = bmp
-        
-        // Оновлюємо стан
-        lastTrackId = currentTrackId
-        lastPackageName = controller.packageName
+        lastTrackTitle = currentTitle
     }
 }
