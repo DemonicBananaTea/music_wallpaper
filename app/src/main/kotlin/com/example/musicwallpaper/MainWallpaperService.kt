@@ -98,7 +98,7 @@ class MainWallpaperService : WallpaperService() {
             // 🔥 затемнення 30%
             val dark = Paint().apply {
                 color = Color.BLACK
-                alpha = 50
+                alpha = 85
             }
 
             canvas.drawRect(0f, 0f, w, h, dark)
