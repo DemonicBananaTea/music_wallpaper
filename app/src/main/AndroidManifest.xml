@@ -1,41 +1,23 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.musicwallpaper">
-<uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
-    <application android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:label="LiveWallpaper"
+        android:allowBackup="true">
 
         <service
-            android:name=".MainWallpaperService"
+            android:name=".MyWallpaperService"
             android:permission="android.permission.BIND_WALLPAPER"
             android:exported="true">
 
             <intent-filter>
-                <action android:name="android.service.wallpaper.WallpaperService"/>
+                <action android:name="android.service.wallpaper.WallpaperService" />
             </intent-filter>
 
             <meta-data
                 android:name="android.service.wallpaper"
-                android:resource="@xml/wallpaper"/>
+                android:resource="@xml/wallpaper" />
         </service>
 
-        <service
-            android:name=".DummyNotificationListener"
-            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
-            android:exported="true">
-
-            <intent-filter>
-                <action android:name="android.service.notification.NotificationListenerService"/>
-            </intent-filter>
-        </service>
-<activity android:name=".AppSelectActivity"/>
-<activity
-    android:name=".MainActivity"
-    android:exported="true">
-
-    <intent-filter>
-        <action android:name="android.intent.action.MAIN"/>
-        <category android:name="android.intent.category.LAUNCHER"/>
-    </intent-filter>
-
-</activity>
     </application>
+
 </manifest>

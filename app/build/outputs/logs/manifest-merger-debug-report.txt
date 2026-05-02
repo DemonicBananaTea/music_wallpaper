@@ -1,0 +1,51 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:1:1-23:12
+INJECTED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:1:1-23:12
+INJECTED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:1:1-23:12
+INJECTED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:1:1-23:12
+	package
+		INJECTED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml
+	android:versionName
+		INJECTED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml
+	android:versionCode
+		INJECTED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml
+	xmlns:android
+		ADDED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:1:11-69
+application
+ADDED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:3:5-21:19
+INJECTED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:3:5-21:19
+	android:extractNativeLibs
+		INJECTED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml
+	android:label
+		ADDED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:4:9-38
+	android:allowBackup
+		ADDED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:5:9-35
+service#com.example.livewallpaper.MyWallpaperService
+ADDED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:7:9-19:19
+	android:exported
+		ADDED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:10:13-36
+	android:permission
+		ADDED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:9:13-67
+	android:name
+		ADDED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:8:13-47
+intent-filter#action:name:android.service.wallpaper.WallpaperService
+ADDED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:12:13-14:29
+action#android.service.wallpaper.WallpaperService
+ADDED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:13:17-85
+	android:name
+		ADDED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:13:25-82
+meta-data#android.service.wallpaper
+ADDED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:16:13-18:53
+	android:resource
+		ADDED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:18:17-50
+	android:name
+		ADDED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:17:17-57
+uses-sdk
+INJECTED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml
+INJECTED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml

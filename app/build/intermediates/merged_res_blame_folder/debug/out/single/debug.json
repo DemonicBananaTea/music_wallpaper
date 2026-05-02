@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "com.example.livewallpaper.app-merged_res-4:/xml_wallpaper.xml.flat",
+        "source": "com.example.livewallpaper.app-main-6:/xml/wallpaper.xml"
+    },
+    {
+        "merged": "com.example.livewallpaper.app-merged_res-4:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.example.livewallpaper.app-main-6:/mipmap-anydpi-v26/ic_launcher.xml"
+    }
+]

@@ -1,0 +1,43 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.example.livewallpaper"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="31"
+9        android:targetSdkVersion="34" />
+10
+11    <application
+11-->/data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:3:5-21:19
+12        android:allowBackup="true"
+12-->/data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:5:9-35
+13        android:debuggable="true"
+14        android:extractNativeLibs="false"
+15        android:label="LiveWallpaper" >
+15-->/data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:4:9-38
+16        <service
+16-->/data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:7:9-19:19
+17            android:name="com.example.livewallpaper.MyWallpaperService"
+17-->/data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:8:13-47
+18            android:exported="true"
+18-->/data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:10:13-36
+19            android:permission="android.permission.BIND_WALLPAPER" >
+19-->/data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:9:13-67
+20            <intent-filter>
+20-->/data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:12:13-14:29
+21                <action android:name="android.service.wallpaper.WallpaperService" />
+21-->/data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:13:17-85
+21-->/data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:13:25-82
+22            </intent-filter>
+23
+24            <meta-data
+24-->/data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:16:13-18:53
+25                android:name="android.service.wallpaper"
+25-->/data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:17:17-57
+26                android:resource="@xml/wallpaper" />
+26-->/data/data/com.termux/files/home/MusicWallpaper/app/src/main/AndroidManifest.xml:18:17-50
+27        </service>
+28    </application>
+29
+30</manifest>
