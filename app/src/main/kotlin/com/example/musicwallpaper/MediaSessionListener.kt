@@ -12,7 +12,7 @@ class MediaSessionReader(private val context: Context) {
 
     private val component =
         ComponentName(context, DummyNotificationListener::class.java)
-    private val controllerOld = null
+    private var controllerOld = null
     fun update() {
         val allowed = Settings.getAllowedApps(context)
         val sessions = manager.getActiveSessions(component)
