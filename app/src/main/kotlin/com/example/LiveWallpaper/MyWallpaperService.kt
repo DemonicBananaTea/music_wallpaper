@@ -27,10 +27,6 @@ class MyWallpaperService : WallpaperService() {
 
         override fun onSurfaceCreated(holder: SurfaceHolder) {
             super.onSurfaceCreated(holder)
-            
-            val frame = holder.surfaceFrame
-            val width = frame.width()
-            val height = frame.height()
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 renderer = HardwareRenderer().apply {
@@ -38,9 +34,8 @@ class MyWallpaperService : WallpaperService() {
                 }
 
                 renderNode = RenderNode("content").apply {
-            // Використовуємо отримані розміри
-                    setPosition(0, 0, width, height)
-                    
+                    setPosition(0, 0, 1080, 1920)
+
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         // 👇 ОЦЕ ПРАЦЮЄ
                         renderEffect = RenderEffect.createBlurEffect(
