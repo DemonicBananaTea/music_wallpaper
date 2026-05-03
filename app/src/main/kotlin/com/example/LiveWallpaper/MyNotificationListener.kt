@@ -9,7 +9,7 @@ import android.media.session.MediaSessionManager
 import android.os.Build
 import android.service.notification.NotificationListenerService
 
-class MyNotificationListener : NotificationListenerService(), MediaSessionManager.OnActiveSessionsChangedListener() {
+class MyNotificationListener : NotificationListenerService(), MediaSessionManager.OnActiveSessionsChangedListener {
 
     private var sessionManager: MediaSessionManager? = null
 
