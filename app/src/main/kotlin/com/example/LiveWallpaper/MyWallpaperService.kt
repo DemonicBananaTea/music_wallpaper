@@ -1,11 +1,9 @@
 package com.example.livewallpaper
 
-import android.service.wallpaper.WallpaperService
-import android.view.SurfaceHolder
 import android.graphics.*
 import android.os.Build
-import android.graphics.RenderEffect
-import android.graphics.Shader
+import android.service.wallpaper.WallpaperService
+import android.view.SurfaceHolder
 
 class MyWallpaperService : WallpaperService() {
 
@@ -15,44 +13,54 @@ class MyWallpaperService : WallpaperService() {
 
     inner class MyEngine : Engine() {
 
-        private val textPaint = Paint().apply {
+        private val paint = Paint().apply {
             color = Color.WHITE
             textSize = 60f
         }
 
-        private val blurPaint = Paint()
+        private var renderNode: RenderNode? = null
 
         override fun onSurfaceCreated(holder: SurfaceHolder) {
             super.onSurfaceCreated(holder)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                renderNode = RenderNode("blurNode").apply {
+                    setPosition(0, 0, 1080, 1920)
+                }
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    setRenderEffect(
+                        RenderEffect.createBlurEffect(
+                            40f, 40f,
+                            Shader.TileMode.CLAMP
+                        )
+                    )
+                }
+            }
+
             drawFrame(holder)
         }
 
         private fun drawFrame(holder: SurfaceHolder) {
             val canvas = holder.lockCanvas()
 
-            // 1. Створюємо bitmap як "шар"
-            val width = canvas.width
-            val height = canvas.height
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && renderNode != null) {
 
-            val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-            val offscreenCanvas = Canvas(bitmap)
+                val recordingCanvas = renderNode!!.beginRecording()
 
-            // 2. Малюємо ТУДИ (не одразу на екран)
-            offscreenCanvas.drawColor(Color.BLACK)
-            offscreenCanvas.drawText("HELLO WALLPAPER", 100f, 200f, textPaint)
+                // малюємо ВНУТРІ renderNode
+                recordingCanvas.drawColor(Color.BLACK)
+                recordingCanvas.drawText("HELLO WALLPAPER", 100f, 200f, paint)
 
-            // 3. Накладаємо blur (API 31+)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                blurPaint.setRenderEffect(
-                    RenderEffect.createBlurEffect(
-                        40f, 40f,
-                        Shader.TileMode.CLAMP
-                    )
-                )
+                renderNode!!.endRecording()
+
+                // малюємо renderNode на екран
+                canvas.drawRenderNode(renderNode!!)
+            } else {
+                // fallback
+                canvas.drawColor(Color.BLACK)
+                canvas.drawText("HELLO WALLPAPER", 100f, 200f, paint)
             }
-
-            // 4. Малюємо bitmap з блюром на реальний canvas
-            canvas.drawBitmap(bitmap, 0f, 0f, blurPaint)
 
             holder.unlockCanvasAndPost(canvas)
         }
