@@ -83,7 +83,7 @@ class MyWallpaperService : WallpaperService() {
             val canvas = node.beginRecording()
 
             // малюєш як хочеш
-            canvas.drawColor(Color.BLACK)
+            canvas.drawColor(Color.BLUE)
             canvas.drawText("HELLO WALLPAPER", 100f, 200f, paint)
 
             node.endRecording()
