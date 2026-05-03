@@ -27,23 +27,20 @@ class MyNotificationListener : NotificationListenerService(), MediaSessionManage
         val component = ComponentName(this, MyNotificationListener::class.java)
         sessionManager?.addOnActiveSessionsChangedListener(this, component)
         
-        fetchSpotifyMetadata()
+        fetchMetadata()
     }
 
-    // Цей метод викликається системою, коли Spotify міняє трек
     override fun onActiveSessionsChanged(controllers: MutableList<MediaController>?) {
-        fetchSpotifyMetadata()
+        fetchMetadata()
     }
 
-    private fun fetchSpotifyMetadata() {
+    private fun fetchMetadata() {
         val component = ComponentName(this, MyNotificationListener::class.java)
         val sessions = sessionManager?.getActiveSessions(component) ?: return
 
-        // Шукаємо саме Spotify серед активних сесій
-        val spotify = sessions.find { it.packageName == "com.spotify.music" } 
-                      ?: sessions.firstOrNull() // або беремо будь-який перший, якщо Spotify не знайдено
+        val session = sessions.firstOrNull()
 
-        spotify?.metadata?.let { metadata ->
+        session?.metadata?.let { metadata ->
             // Витягаємо обкладинку (пробуємо спочатку велику, потім іконку)
             val rawBitmap = metadata.getBitmap(MediaMetadata.METADATA_KEY_ART)
                 ?: metadata.getBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON)
