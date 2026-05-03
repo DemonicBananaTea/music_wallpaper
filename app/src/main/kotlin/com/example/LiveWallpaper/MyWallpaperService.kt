@@ -20,6 +20,15 @@ class MyWallpaperService : WallpaperService() {
             color = Color.WHITE
             textSize = 60f
         }
+        private var albumArt: Bitmap? = null
+        
+        init {
+        // Підписуємося на оновлення БЕЗПОСЕРЕДНЬО при ініціалізації Engine
+        MyNotificationListener.onBitmapUpdate = { bmp ->
+            this.albumArt = bmp
+            drawFrame() // Перемальовуємо, як тільки прийшла нова картинка
+        }
+    }
 
         private var renderer: HardwareRenderer? = null
         private var renderNode: RenderNode? = null
@@ -81,13 +90,17 @@ class MyWallpaperService : WallpaperService() {
             val renderer = renderer ?: return
 
             val canvas = node.beginRecording()
+            
+            try {
+            canvas.drawColor(Color.BLACK)
 
-            // малюєш як хочеш
-            canvas.drawColor(Color.BLUE)
-            canvas.drawText("HELLO WALLPAPER", 100f, 200f, paint)
-
+            albumArt?.let { bmp ->
+                val destRect = Rect(0, 0, node.width, node.height)
+                canvas.drawBitmap(bmp, null, destRect, null)
+            }
+        } finally {
             node.endRecording()
-
+        }
             renderer.setContentRoot(node)
             renderer.createRenderRequest()
                 .setVsyncTime(System.nanoTime())
