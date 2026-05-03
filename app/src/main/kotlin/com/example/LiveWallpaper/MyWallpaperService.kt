@@ -27,6 +27,10 @@ class MyWallpaperService : WallpaperService() {
 
         override fun onSurfaceCreated(holder: SurfaceHolder) {
             super.onSurfaceCreated(holder)
+            
+            val frame = holder.surfaceFrame
+            val width = frame.width()
+            val height = frame.height()
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 renderer = HardwareRenderer().apply {
@@ -34,14 +38,19 @@ class MyWallpaperService : WallpaperService() {
                 }
 
                 renderNode = RenderNode("content").apply {
-                    setPosition(0, 0, 1080, 1920)
-
+            // Використовуємо отримані розміри
+                    setPosition(0, 0, width, height)
+                    
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        // 👇 ОЦЕ ПРАЦЮЄ
-                        renderEffect = RenderEffect.createBlurEffect(
-                            40f, 40f, Shader.TileMode.CLAMP
-                        )
-                    }
+        // Створюємо ефект
+        val blur = RenderEffect.createBlurEffect(40f, 40f, Shader.TileMode.CLAMP)
+        
+        // ПРИЗНАЧАЄМО його вузлу (це метод класу RenderNode)
+        setRenderEffect(blur) 
+        
+        // Якщо тобі все ще потрібна посилання в класі MyEngine:
+        this@MyEngine.renderEffect = blur
+    }
                 }
             }
 
