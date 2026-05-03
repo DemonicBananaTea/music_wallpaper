@@ -65,11 +65,29 @@ class MyNotificationListener : NotificationListenerService(), MediaSessionManage
 
 
 private fun extractBitmap(metadata: MediaMetadata) {
-    val rawBitmap = metadata.getBitmap(MediaMetadata.METADATA_KEY_ART)
-        ?: metadata.getBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON)
+    Log.d("WallpaperLog", "--- Починаємо екстракцію бітмапа ---")
     
-    rawBitmap?.let { processAndPost(it) }
+    // Перевіряємо всі можливі ключі по черзі
+    val art = metadata.getBitmap(MediaMetadata.METADATA_KEY_ART)
+    val albumArt = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
+    val icon = metadata.getBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON)
+
+    Log.d("WallpaperLog", "Ключі: ART=${art != null}, ALBUM_ART=${albumArt != null}, ICON=${icon != null}")
+
+    val result = art ?: albumArt ?: icon
+
+    if (result != null) {
+        Log.d("WallpaperLog", "Успіх! Бітмап знайдено.")
+        processAndPost(result)
+    } else {
+        Log.e("WallpaperLog", "ЖАХ! Всі ключі порожні. Spotify не віддав картинку.")
+        
+        // Перевіримо, чи є хоча б назва треку, щоб знати, що метадані взагалі живі
+        val title = metadata.getString(MediaMetadata.METADATA_KEY_TITLE)
+        Log.d("WallpaperLog", "Трек, для якого шукаємо арт: $title")
+    }
 }
+
 
 
     private fun processAndPost(source: Bitmap) {
