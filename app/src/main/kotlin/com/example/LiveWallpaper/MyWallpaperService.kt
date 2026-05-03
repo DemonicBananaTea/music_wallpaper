@@ -57,7 +57,12 @@ class MyWallpaperService : WallpaperService() {
     
             // Встановлюємо розміри RenderNode згідно з параметрами поверхні
             renderNode?.setPosition(0, 0, width, height)
-    
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        // 👇 ОЦЕ ПРАЦЮЄ
+                    renderEffect = RenderEffect.createBlurEffect(
+                        40f, 40f, Shader.TileMode.CLAMP
+                    )
+            }
             // Після зміни розмірів варто перемалювати кадр
             drawFrame()
         }
