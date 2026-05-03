@@ -23,7 +23,7 @@ class MyWallpaperService : WallpaperService() {
 
         private var renderer: HardwareRenderer? = null
         private var renderNode: RenderNode? = null
-        private var renderEffecr: RenderEffecr? = null
+        private var renderEffect: RenderEffect? = null
 
         override fun onSurfaceCreated(holder: SurfaceHolder) {
             super.onSurfaceCreated(holder)
