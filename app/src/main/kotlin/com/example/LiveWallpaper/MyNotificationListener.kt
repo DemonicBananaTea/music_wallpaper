@@ -23,7 +23,6 @@ class MyNotificationListener : NotificationListenerService(), MediaSessionManage
         super.onListenerConnected()
         sessionManager = getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
         
-        // РЕЄСТРУЄМО СЛУХАЧА (Ось чого не вистачало!)
         val component = ComponentName(this, MyNotificationListener::class.java)
         sessionManager?.addOnActiveSessionsChangedListener(this, component)
         
@@ -35,29 +34,30 @@ class MyNotificationListener : NotificationListenerService(), MediaSessionManage
     }
 
     private fun fetchMetadata() {
-        val component = ComponentName(this, MyNotificationListener::class.java)
-        val sessions = sessionManager?.getActiveSessions(component) ?: return
+    val component = ComponentName(this, MyNotificationListener::class.java)
+    val sessions = sessionManager?.getActiveSessions(component) ?: return
 
-        val session = sessions.find { it.packageName == "com.spotify.music" } ?: null
+    // 1. Використовуємо реальний ID пакету
+    val session = sessions.find { it.packageName == "com.spotify.music" } ?: sessions.firstOrNull()
 
-        session?.metadata?.let { metadata ->
-            // Витягаємо обкладинку (пробуємо спочатку велику, потім іконку)
-            val rawBitmap = metadata.getBitmap(MediaMetadata.METADATA_KEY_ART)
-                ?: metadata.getBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON)
+    session?.let { controller ->
+        // 2. РЕЄСТРУЄМО КОЛБЕК (щоб ловити перемикання треків)
+        controller.registerCallback(object : MediaController.Callback() {
+            override fun onMetadataChanged(metadata: MediaMetadata?) {
+                metadata?.let { extractBitmap(it) }
+            }
+        })
 
-            rawBitmap?.let { processAndPost(it) }
-        }
+        // 3. Витягуємо поточне, що вже грає
+        controller.metadata?.let { extractBitmap(it) }
     }
+}
 
-    private fun processAndPost(source: Bitmap) {
-        // Конвертація в HARDWARE для HardwareRenderer
-        val hardwareBitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            source.copy(Bitmap.Config.HARDWARE, false)
-        } else {
-            source
-        }
+private fun extractBitmap(metadata: MediaMetadata) {
+    val rawBitmap = metadata.getBitmap(MediaMetadata.METADATA_KEY_ART)
+        ?: metadata.getBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON)
+    
+    rawBitmap?.let { processAndPost(it) }
+}
 
-        latestBitmap = hardwareBitmap
-        onBitmapUpdate?.invoke(hardwareBitmap)
-    }
 }
