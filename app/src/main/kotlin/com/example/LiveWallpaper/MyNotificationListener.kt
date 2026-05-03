@@ -38,7 +38,7 @@ class MyNotificationListener : NotificationListenerService(), MediaSessionManage
         val component = ComponentName(this, MyNotificationListener::class.java)
         val sessions = sessionManager?.getActiveSessions(component) ?: return
 
-        val session = sessions.firstOrNull()
+        val session = sessions.find { it.packageName == "com.spotify.music" } ?: null
 
         session?.metadata?.let { metadata ->
             // Витягаємо обкладинку (пробуємо спочатку велику, потім іконку)
