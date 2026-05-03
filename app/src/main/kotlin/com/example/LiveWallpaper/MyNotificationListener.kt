@@ -38,7 +38,7 @@ class MyNotificationListener : NotificationListenerService(), MediaSessionManage
     val sessions = sessionManager?.getActiveSessions(component) ?: return
 
     // 1. Використовуємо реальний ID пакету
-    val session = sessions.find { it.packageName == "com.spotify.music" } ?: sessions.firstOrNull()
+    val session = sessions.find { it.packageName == "com.spotify.music" } ?: sessions.firstOrNull() // якщо не Spotify, то хоч щось
 
     session?.let { controller ->
         // 2. РЕЄСТРУЄМО КОЛБЕК (щоб ловити перемикання треків)
@@ -60,4 +60,16 @@ private fun extractBitmap(metadata: MediaMetadata) {
     rawBitmap?.let { processAndPost(it) }
 }
 
+
+    private fun processAndPost(source: Bitmap) {
+        // Конвертація в HARDWARE для HardwareRenderer
+        val hardwareBitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            source.copy(Bitmap.Config.HARDWARE, false)
+        } else {
+            source
+        }
+
+        latestBitmap = hardwareBitmap
+        onBitmapUpdate?.invoke(hardwareBitmap)
+    }
 }
