@@ -42,19 +42,36 @@ class MyWallpaperService : WallpaperService() {
                     setPosition(0, 0, width, height)
                     
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        // Створюємо ефект
-        val blur = RenderEffect.createBlurEffect(40f, 40f, Shader.TileMode.CLAMP)
+                        // Створюємо ефект
+                        val blur = RenderEffect.createBlurEffect(40f, 40f, Shader.TileMode.CLAMP)
         
-        // ПРИЗНАЧАЄМО його вузлу (це метод класу RenderNode)
-        setRenderEffect(blur) 
+                        // ПРИЗНАЧАЄМО його вузлу (це метод класу RenderNode)
+                    setRenderEffect(blur) 
         
-        // Якщо тобі все ще потрібна посилання в класі MyEngine:
-        this@MyEngine.renderEffect = blur
+                    // Якщо тобі все ще потрібна посилання в класі MyEngine:
+                    this@MyEngine.renderEffect = blur
     }
                 }
             }
 
             drawFrame()
+        }
+        
+        override fun onSurfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
+            super.onSurfaceChanged(holder, format, width, height)
+            // 💢 Ось тут ми виправляємо мій попередній закид про хардкод!
+            renderNode?.setPosition(0, 0, width, height)
+            drawFrame()
+        }
+        
+        override fun onSurfaceDestroyed(holder: SurfaceHolder) {
+            super.onSurfaceDestroyed(holder)
+            // КРИТИЧНО: зупиняємо рендер, щоб не було витоків
+            renderer?.apply {
+                stop()
+                destroy()
+            }
+            renderer = null
         }
 
         private fun drawFrame() {
