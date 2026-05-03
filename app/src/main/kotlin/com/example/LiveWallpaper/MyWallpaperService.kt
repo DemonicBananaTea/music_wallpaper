@@ -27,6 +27,10 @@ class MyWallpaperService : WallpaperService() {
 
         override fun onSurfaceCreated(holder: SurfaceHolder) {
             super.onSurfaceCreated(holder)
+            
+            val frame = holder.surfaceFrame
+            val width = frame.width()
+            val height = frame.height()
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 renderer = HardwareRenderer().apply {
@@ -34,8 +38,8 @@ class MyWallpaperService : WallpaperService() {
                 }
 
                 renderNode = RenderNode("content").apply {
-                    setPosition(0, 0, 1080, 1920)
-
+                    setPosition(0, 0, width, height)
+                    
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         // 👇 ОЦЕ ПРАЦЮЄ
                         renderEffect = RenderEffect.createBlurEffect(
@@ -47,6 +51,27 @@ class MyWallpaperService : WallpaperService() {
 
             drawFrame()
         }
+        
+        override fun onSurfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
+            super.onSurfaceChanged(holder, format, width, height)
+    
+            // Встановлюємо розміри RenderNode згідно з параметрами поверхні
+            renderNode?.setPosition(0, 0, width, height)
+    
+            // Після зміни розмірів варто перемалювати кадр
+            drawFrame()
+        }
+        
+        override fun onSurfaceDestroyed(holder: SurfaceHolder) {
+            super.onSurfaceDestroyed(holder)
+            // КРИТИЧНО: зупиняємо рендер, щоб не було витоків
+            renderer?.apply {
+                stop()
+                destroy()
+            }
+            renderer = null
+        }
+
 
         private fun drawFrame() {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return
