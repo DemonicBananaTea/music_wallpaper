@@ -9,7 +9,7 @@ import android.media.session.MediaSessionManager
 import android.os.Build
 import android.service.notification.NotificationListenerService
 
-class MyNotificationListener : NotificationListenerService() {
+class MyNotificationListener : NotificationListenerService(), MediaSessionManager.OnActiveSessionsChangedListener() {
 
     private var sessionManager: MediaSessionManager? = null
 
@@ -22,6 +22,11 @@ class MyNotificationListener : NotificationListenerService() {
     override fun onListenerConnected() {
         super.onListenerConnected()
         sessionManager = getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
+        
+        // РЕЄСТРУЄМО СЛУХАЧА (Ось чого не вистачало!)
+        val component = ComponentName(this, MyNotificationListener::class.java)
+        sessionManager?.addOnActiveSessionsChangedListener(this, component)
+        
         fetchSpotifyMetadata()
     }
 
