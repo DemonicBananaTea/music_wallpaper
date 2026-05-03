@@ -8,6 +8,8 @@ import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import android.os.Build
 import android.service.notification.NotificationListenerService
+import android.util.Log
+
 
 class MyNotificationListener : NotificationListenerService(), MediaSessionManager.OnActiveSessionsChangedListener {
 
@@ -39,7 +41,7 @@ class MyNotificationListener : NotificationListenerService(), MediaSessionManage
 
     // 1. Використовуємо реальний ID пакету
     val session = sessions.find { it.packageName == "com.spotify.music" } ?: sessions.firstOrNull() // якщо не Spotify, то хоч щось
-
+android.util.Log.d("WallpaperLog", "Active sessions count: ${sessions?.size ?: 0}")
     session?.let { controller ->
         // 2. РЕЄСТРУЄМО КОЛБЕК (щоб ловити перемикання треків)
         controller.registerCallback(object : MediaController.Callback() {
