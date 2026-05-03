@@ -39,21 +39,30 @@ class MyNotificationListener : NotificationListenerService(), MediaSessionManage
     val component = ComponentName(this, MyNotificationListener::class.java)
     val sessions = sessionManager?.getActiveSessions(component) ?: return
 
-    // 1. Використовуємо реальний ID пакету
-    val session = sessions.find { it.packageName == "com.spotify.music" } ?: sessions.firstOrNull() // якщо не Spotify, то хоч щось
-android.util.Log.d("WallpaperLog", "Active sessions count: ${sessions?.size ?: 0}")
+    Log.d("WallpaperLog", "Sessions: ${sessions.size}")
+
+    // 1. Використовуємо ПРАВИЛЬНИЙ пакет для Spotify
+    val session = sessions.find { it.packageName == "com.spotify.music" } ?: sessions.firstOrNull()
+
     session?.let { controller ->
-        // 2. РЕЄСТРУЄМО КОЛБЕК (щоб ловити перемикання треків)
+        Log.d("WallpaperLog", "Using session: ${controller.packageName}")
+
+        // 2. РЕЄСТРУЄМО КОЛБЕК (це змусить фон оновлюватися самому)
         controller.registerCallback(object : MediaController.Callback() {
             override fun onMetadataChanged(metadata: MediaMetadata?) {
+                Log.d("WallpaperLog", "Metadata changed (New song!)")
                 metadata?.let { extractBitmap(it) }
             }
         })
 
-        // 3. Витягуємо поточне, що вже грає
-        controller.metadata?.let { extractBitmap(it) }
+        // 3. Відразу витягуємо поточну картинку
+        controller.metadata?.let { 
+            Log.d("WallpaperLog", "Extracting initial metadata")
+            extractBitmap(it) 
+        }
     }
 }
+
 
 private fun extractBitmap(metadata: MediaMetadata) {
     val rawBitmap = metadata.getBitmap(MediaMetadata.METADATA_KEY_ART)
