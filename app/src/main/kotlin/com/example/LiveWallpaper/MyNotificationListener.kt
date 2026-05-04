@@ -14,6 +14,15 @@ import android.util.Log
 class MyNotificationListener : NotificationListenerService(), MediaSessionManager.OnActiveSessionsChangedListener {
 
     private var sessionManager: MediaSessionManager? = null
+    
+    private var currentController: MediaController? = null
+
+    private val sessionCallback = object : MediaController.Callback() {
+        override fun onMetadataChanged(metadata: MediaMetadata?) {
+            Log.d("WallpaperLog", "Metadata changed inside Callback")
+            metadata?.let { extractBitmap(it) }
+        }
+    }
 
     // Об'єкт для передачі даних (можеш замінити на свій механізм)
     companion object {
@@ -38,28 +47,27 @@ class MyNotificationListener : NotificationListenerService(), MediaSessionManage
     private fun fetchMetadata() {
     val component = ComponentName(this, MyNotificationListener::class.java)
     val sessions = sessionManager?.getActiveSessions(component) ?: return
+    
+    if (sessions.isNullOrEmpty()) {
+        currentController?.unregisterCallback(sessionCallback)
+        currentController = null
+        return
+    }
+    
+    val newController = sessions.find { it.packageName == "com.spotify.music" } ?: sessions.firstOrNull()
 
-    Log.d("WallpaperLog", "Sessions: ${sessions.size}")
+    // Якщо це той самий контролер, що вже слухаємо — нічого не робимо
+    if (newController?.sessionToken == currentController?.sessionToken) return
 
-    // 1. Використовуємо ПРАВИЛЬНИЙ пакет для Spotify
-    val session = sessions.firstOrNull() { it.packageName == "com.spotify.music" }
-
-    session?.let { controller ->
-        Log.d("WallpaperLog", "Using session: ${controller.packageName}")
-
-        // 2. РЕЄСТРУЄМО КОЛБЕК (це змусить фон оновлюватися самому)
-        controller.registerCallback(object : MediaController.Callback() {
-            override fun onMetadataChanged(metadata: MediaMetadata?) {
-                Log.d("WallpaperLog", "Metadata changed (New song!)")
-                metadata?.let { extractBitmap(it) }
-            }
-        })
-
-        // 3. Відразу витягуємо поточну картинку
-        controller.metadata?.let { 
-            Log.d("WallpaperLog", "Extracting initial metadata")
-            extractBitmap(it) 
-        }
+    // Відписуємося від старого
+    currentController?.unregisterCallback(sessionCallback)
+    
+    // Підписуємося на новий
+    currentController = newController
+    currentController?.let { controller ->
+        Log.d("WallpaperLog", "Subscribing to new session: ${controller.packageName}")
+        controller.registerCallback(sessionCallback)
+        controller.metadata?.let { extractBitmap(it) }
     }
 }
 
