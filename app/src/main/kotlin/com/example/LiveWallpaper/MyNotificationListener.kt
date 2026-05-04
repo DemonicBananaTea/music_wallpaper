@@ -91,7 +91,7 @@ private fun extractBitmap(metadata: MediaMetadata) {
         processAndPost(result)
     } else {
         Log.e("WallpaperLog", "ЖАХ! Всі ключі порожні. Spotify не віддав картинку.")
-        
+        LatestBitmap = null
         // Перевіримо, чи є хоча б назва треку, щоб знати, що метадані взагалі живі
         val title = metadata.getString(MediaMetadata.METADATA_KEY_TITLE)
         Log.d("WallpaperLog", "Трек, для якого шукаємо арт: $title")

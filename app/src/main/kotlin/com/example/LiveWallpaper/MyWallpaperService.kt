@@ -105,39 +105,46 @@ class MyWallpaperService : WallpaperService() {
             val canvas = node.beginRecording()
             
             try {
-            canvas.drawColor(Color.BLACK)
+                if (albumArt != null){
+                    canvas.drawColor(Color.BLACK)
+                    
+                    albumArt?.let { bmp ->
+                        val viewWidth = node.width.toFloat()
+                        val viewHeight = node.height.toFloat()
+                        val bmpWidth = bmp.width.toFloat()
+                        val bmpHeight = bmp.height.toFloat()
             
-            albumArt?.let { bmp ->
-            val viewWidth = node.width.toFloat()
-            val viewHeight = node.height.toFloat()
-            val bmpWidth = bmp.width.toFloat()
-            val bmpHeight = bmp.height.toFloat()
-
-            // 1. Обчислюємо коефіцієнт масштабування (щоб заповнити весь екран)
-            val scale = Math.max(viewWidth / bmpWidth, viewHeight / bmpHeight)
-
-            // 2. Визначаємо фінальні розміри після масштабування
-            val finalWidth = bmpWidth * scale
-            val finalHeight = bmpHeight * scale
-
-            // 3. Центруємо: зміщуємо вліво/вгору на половину зайвого простору
-            val left = (viewWidth - finalWidth) / 2f
-            val top = (viewHeight - finalHeight) / 2f
-
-            // 4. Створюємо RectF для малювання (RectF працює з Float)
-            val destRect = RectF(left, top, left + finalWidth, top + finalHeight)
-
-            // Малюємо з фільтрацією, щоб не було "пікселів" при розтягуванні
-            canvas.drawBitmap(bmp, null, destRect, null)
-        }
-    }
+                        // 1. Обчислюємо коефіцієнт масштабування (щоб заповнити весь екран)
+                        val scale = Math.max(viewWidth / bmpWidth, viewHeight / bmpHeight)
+            
+                        // 2. Визначаємо фінальні розміри після масштабування
+                        val finalWidth = bmpWidth * scale
+                        val finalHeight = bmpHeight * scale
+            
+                        // 3. Центруємо: зміщуємо вліво/вгору на половину зайвого простору
+                        val left = (viewWidth - finalWidth) / 2f
+                        val top = (viewHeight - finalHeight) / 2f
+            
+                        // 4. Створюємо RectF для малювання (RectF працює з Float)
+                        val destRect = RectF(left, top, left + finalWidth, top + finalHeight)
+            
+                        // Малюємо з фільтрацією, щоб не було "пікселів" при розтягуванні
+                        canvas.drawBitmap(bmp, null, destRect, null)
+                    }
+                }
+                else{
+                    canvas.drawColor(Color.BLACK)
+                }
+            }
+            
             finally {
-            node.endRecording()
-        }
+                node.endRecording()
+            }
+            
             renderer.setContentRoot(node)
             renderer.createRenderRequest()
-                .setVsyncTime(System.nanoTime())
-                .syncAndDraw()
+            .setVsyncTime(System.nanoTime())
+            .syncAndDraw()
         }
     }
 }
