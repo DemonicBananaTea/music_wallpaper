@@ -20,6 +20,11 @@ class MyWallpaperService : WallpaperService() {
         private var albumArt: Bitmap? = null
         
         init {
+            
+            MyNotificationListener.latestBitmap?.let { bmp ->
+                this.albumArt = bmp
+            }
+        
             MyNotificationListener.onBitmapUpdate = { bmp ->
                 this.albumArt = bmp
                 if (isVisible) {
@@ -31,6 +36,9 @@ class MyWallpaperService : WallpaperService() {
         override fun onVisibilityChanged(visible: Boolean) {
             this.isVisible = visible
             if (visible) {
+                MyNotificationListener.latestBitmap?.let { bmp ->
+                    this.albumArt = bmp
+                }
                 drawFrame() // Перемальовуємо, щоб показати актуальну обкладинку при поверненні
             }
         }
