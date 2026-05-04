@@ -91,7 +91,7 @@ private fun extractBitmap(metadata: MediaMetadata) {
         processAndPost(result)
     } else {
         Log.e("WallpaperLog", "ЖАХ! Всі ключі порожні. Spotify не віддав картинку.")
-        processAndPost(null)
+        
         // Перевіримо, чи є хоча б назва треку, щоб знати, що метадані взагалі живі
         val title = metadata.getString(MediaMetadata.METADATA_KEY_TITLE)
         Log.d("WallpaperLog", "Трек, для якого шукаємо арт: $title")
@@ -100,8 +100,7 @@ private fun extractBitmap(metadata: MediaMetadata) {
 
 
 
-    private fun processAndPost(source: Bitmap) {
-        if(source != null){
+    private fun processAndPost(source: Bitmap) {<)
         // Конвертація в HARDWARE для HardwareRenderer
         val hardwareBitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             source.copy(Bitmap.Config.HARDWARE, false)
@@ -111,10 +110,5 @@ private fun extractBitmap(metadata: MediaMetadata) {
 
         latestBitmap = hardwareBitmap
         onBitmapUpdate?.invoke(hardwareBitmap)
-        }
-        else{
-            latestBitmap = null
-            onBitmapUpdate?.invoke(null)
-        }
     }
 }
