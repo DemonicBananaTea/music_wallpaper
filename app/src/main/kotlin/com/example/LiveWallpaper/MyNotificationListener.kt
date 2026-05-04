@@ -36,7 +36,7 @@ class MyNotificationListener : NotificationListenerService(), MediaSessionManage
         super.onListenerConnected()
         sessionManager = getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
         
-        
+        component = ComponentName(this, MyNotificationListener::class.java)
         sessionManager?.addOnActiveSessionsChangedListener(this, component)
         
         fetchMetadata()
@@ -47,7 +47,7 @@ class MyNotificationListener : NotificationListenerService(), MediaSessionManage
     }
 
     private fun fetchMetadata() {
- 
+    
     val sessions = sessionManager?.getActiveSessions(component) ?: return
     
     if (sessions.isNullOrEmpty()) {
