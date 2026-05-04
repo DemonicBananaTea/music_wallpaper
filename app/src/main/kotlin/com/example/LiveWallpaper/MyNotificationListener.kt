@@ -42,7 +42,7 @@ class MyNotificationListener : NotificationListenerService(), MediaSessionManage
     Log.d("WallpaperLog", "Sessions: ${sessions.size}")
 
     // 1. Використовуємо ПРАВИЛЬНИЙ пакет для Spotify
-    val session = sessions.find { it.packageName == "com.spotify.music" } ?: sessions.firstOrNull()
+    val session = sessions.firstOrNull() { it.packageName == "com.spotify.music" }
 
     session?.let { controller ->
         Log.d("WallpaperLog", "Using session: ${controller.packageName}")
