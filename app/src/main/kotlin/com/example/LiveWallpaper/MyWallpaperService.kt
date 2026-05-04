@@ -16,19 +16,24 @@ class MyWallpaperService : WallpaperService() {
 
     inner class MyEngine : Engine() {
 
-        private val paint = Paint().apply {
-            color = Color.WHITE
-            textSize = 60f
-        }
+        private var isVisible = false
         private var albumArt: Bitmap? = null
         
         init {
-        // Підписуємося на оновлення БЕЗПОСЕРЕДНЬО при ініціалізації Engine
-        MyNotificationListener.onBitmapUpdate = { bmp ->
-            this.albumArt = bmp
-            drawFrame() // Перемальовуємо, як тільки прийшла нова картинка
+            MyNotificationListener.onBitmapUpdate = { bmp ->
+                this.albumArt = bmp
+                if (isVisible) {
+                    drawFrame() 
+                }
+            }
         }
-    }
+
+        override fun onVisibilityChanged(visible: Boolean) {
+            this.isVisible = visible
+            if (visible) {
+                drawFrame() // Перемальовуємо, щоб показати актуальну обкладинку при поверненні
+            }
+        }
 
         private var renderer: HardwareRenderer? = null
         private var renderNode: RenderNode? = null
@@ -52,7 +57,7 @@ class MyWallpaperService : WallpaperService() {
                     
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         // Створюємо ефект
-                        val blur = RenderEffect.createBlurEffect(80f, 80f, Shader.TileMode.CLAMP)
+                        val blur = RenderEffect.createBlurEffect(120f, 120f, Shader.TileMode.CLAMP)
         
                         // ПРИЗНАЧАЄМО його вузлу (це метод класу RenderNode)
                     setRenderEffect(blur) 

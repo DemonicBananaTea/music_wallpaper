@@ -16,6 +16,8 @@ class MyNotificationListener : NotificationListenerService(), MediaSessionManage
     private var sessionManager: MediaSessionManager? = null
     
     private var currentController: MediaController? = null
+    
+    private var component: ComponentName? = null
 
     private val sessionCallback = object : MediaController.Callback() {
         override fun onMetadataChanged(metadata: MediaMetadata?) {
@@ -34,7 +36,7 @@ class MyNotificationListener : NotificationListenerService(), MediaSessionManage
         super.onListenerConnected()
         sessionManager = getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
         
-        val component = ComponentName(this, MyNotificationListener::class.java)
+        
         sessionManager?.addOnActiveSessionsChangedListener(this, component)
         
         fetchMetadata()
@@ -45,7 +47,7 @@ class MyNotificationListener : NotificationListenerService(), MediaSessionManage
     }
 
     private fun fetchMetadata() {
-    val component = ComponentName(this, MyNotificationListener::class.java)
+ 
     val sessions = sessionManager?.getActiveSessions(component) ?: return
     
     if (sessions.isNullOrEmpty()) {
