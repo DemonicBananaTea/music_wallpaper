@@ -18,6 +18,9 @@ class MyWallpaperService : WallpaperService() {
 
         private var isVisible = false
         private var albumArt: Bitmap? = null
+        private val shadowPaint = Paint().apply {
+            colorFilter = PorterDuffColorFilter(Color.argb(100, 0, 0, 0), PorterDuff.Mode.SRC_ATOP)
+        }
         
         init {
             
@@ -128,7 +131,7 @@ class MyWallpaperService : WallpaperService() {
             val destRect = RectF(left, top, left + finalWidth, top + finalHeight)
 
             // Малюємо з фільтрацією, щоб не було "пікселів" при розтягуванні
-            canvas.drawBitmap(bmp, null, destRect, null)
+            canvas.drawBitmap(bmp, null, destRect, shadowPaint)
         }
     }
             finally {
