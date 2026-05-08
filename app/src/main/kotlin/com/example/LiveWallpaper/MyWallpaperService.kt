@@ -108,6 +108,11 @@ class MyWallpaperService : WallpaperService() {
             val canvas = node.beginRecording()
             
             try {
+		if (MyNotificationListener.isPlaying == false)
+		{
+            canvas.drawColor(Color.BLACK)
+		}
+	else{
             canvas.drawColor(Color.BLACK)
             
             albumArt?.let { bmp ->
@@ -132,7 +137,8 @@ class MyWallpaperService : WallpaperService() {
 
             // Малюємо з фільтрацією, щоб не було "пікселів" при розтягуванні
             canvas.drawBitmap(bmp, null, destRect, shadowPaint)
-        }
+        	}
+	}
     }
             finally {
             node.endRecording()

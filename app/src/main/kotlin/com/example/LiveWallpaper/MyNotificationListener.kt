@@ -9,7 +9,7 @@ import android.media.session.MediaSessionManager
 import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.util.Log
-
+import android.media.session.PlaybackState
 class MyNotificationListener : NotificationListenerService(), MediaSessionManager.OnActiveSessionsChangedListener {
 
     private var sessionManager: MediaSessionManager? = null
@@ -21,14 +21,22 @@ class MyNotificationListener : NotificationListenerService(), MediaSessionManage
     private val sessionCallback = object : MediaController.Callback() {
         override fun onMetadataChanged(metadata: MediaMetadata?) {
             Log.d("WallpaperLog", "Metadata changed inside Callback")
+
             metadata?.let { extractBitmap(it) }
         }
+override fun onPlaybackStateChanged(state: PlaybackState?) {
+    super.onPlaybackStateChanged(state)
+    isPlaying = state?.state == PlaybackState.STATE_PLAYING
+    Log.d("WallpaperLog", "Is playing: $isPlaying")
+}
     }
 
     // Об'єкт для передачі даних (можеш замінити на свій механізм)
     companion object {
         var latestBitmap: Bitmap? = null
         var onBitmapUpdate: ((Bitmap) -> Unit)? = null
+	var isPlaying: Boolean = false
+
     }
 
     override fun onListenerConnected() {
@@ -44,6 +52,8 @@ class MyNotificationListener : NotificationListenerService(), MediaSessionManage
     override fun onActiveSessionsChanged(controllers: MutableList<MediaController>?) {
         fetchMetadata()
     }
+
+
 
     private fun fetchMetadata() {
     
@@ -66,8 +76,10 @@ class MyNotificationListener : NotificationListenerService(), MediaSessionManage
     // Підписуємося на новий
     currentController = newController
     currentController?.let { controller ->
-        Log.d("WallpaperLog", "Subscribing to new session: ${controller.packageName}")
+Log.d("WallpaperLog", "Subscribing to new session: ${controller.packageName}")
         controller.registerCallback(sessionCallback)
+        
+        // Отримуємо поточний стан відтворення
         controller.metadata?.let { extractBitmap(it) }
     }
 }
