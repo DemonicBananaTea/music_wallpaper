@@ -10,43 +10,82 @@ import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.util.Log
 import android.media.session.PlaybackState
+import com.example.livewallpaper.AppSelectActivity
+import android.content.BroadcastReceiver
+import android.content.Intent
+import android.content.IntentFilter
+
 class MyNotificationListener : NotificationListenerService(), MediaSessionManager.OnActiveSessionsChangedListener {
     private var lastExtractedTrack: String? = null 
-private var lastTrackTitle: String? = null
-private var lastTrackArtist: String? = null
-private var isBitmapLoadedForCurrent: Boolean = false
+    private var lastTrackTitle: String? = null
+    private var lastTrackArtist: String? = null
+    private var isBitmapLoadedForCurrent: Boolean = false
+    private var allowedPackages: Set<String> = emptySet()
     private var sessionManager: MediaSessionManager? = null
     
     private var currentController: MediaController? = null
  
     private var component: ComponentName? = null
-
+    
+    private val updateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == "com.example.ACTION_UPDATE_CONFIG") {
+                fetchMetadata() 
+            }
+        }
+    }
+    
     private val sessionCallback = object : MediaController.Callback() {
+
         override fun onMetadataChanged(metadata: MediaMetadata?) {
             Log.d("WallpaperLog", "Metadata changed calling extractBitmap(it). isPlaying = $isPlaying")
             metadata?.let { extractBitmap(it) }
-            }
-    	
+        }
+        
         override fun onPlaybackStateChanged(state: PlaybackState?) {
-    	    super.onPlaybackStateChanged(state)
-        if (state == null) return
+            super.onPlaybackStateChanged(state)
+            if (state == null) return
     
-        // Тепер компілятор ЗНАЄ, що state не null
-        // і результат порівняння буде чистим Boolean
-        val newPlayingState: Boolean = (state.state == PlaybackState.STATE_PLAYING)
+            val newPlayingState: Boolean = (state.state == PlaybackState.STATE_PLAYING)
     
-        if (newPlayingState == isPlaying) return
+            if (newPlayingState == isPlaying) return
             isPlaying = newPlayingState
             Log.d("WallpaperLog", "State changed, invoke. latestBitmap? ${latestBitmap == null}")
-            onStateChanged?.invoke()
+            onStateUpdate()
         }
     }
 
     companion object {
         var latestBitmap: Bitmap? = null
-        var onBitmapUpdate: ((Bitmap) -> Unit)? = null
-	    var isPlaying: Boolean? = null
+        var isPlaying: Boolean? = null
         var onStateChanged: (() -> Unit)? = null
+        private val callbacksBitmap = mutableSetOf<(Bitmap) -> Unit>()
+        
+        fun subscribeBitmap(callback: (Bitmap) -> Unit) {
+            callbacksBitmap.add(callback)
+        }
+        
+        fun unsubscribeBitmap(callback: (Bitmap) -> Unit) {
+            callbacksBitmap.remove(callback)
+        }
+        
+        fun onBitmapUpdate(bitmap: Bitmap) {
+            callbacksBitmap.forEach { it.invoke(bitmap) }
+        }
+
+        private val callbacksState = mutableSetOf<() -> Unit>()
+        
+        fun subscribeState(callback: () -> Unit) {
+            callbacksState.add(callback)
+        }
+        
+        fun unsubscribeState(callback: () -> Unit) {
+            callbacksState.remove(callback)
+        }
+        
+        fun onStateUpdate() {
+            callbacksState.forEach { it.invoke() }
+        }
     }
 
     override fun onCreate() {
@@ -55,15 +94,12 @@ private var isBitmapLoadedForCurrent: Boolean = false
         val sessionManager = getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
         val componentName = ComponentName(this, MyNotificationListener::class.java)
         
-        // Отримуємо список активних сесій (Spotify, YouTube тощо)
         val controllers = sessionManager.getActiveSessions(componentName)
         
         if (controllers.isNotEmpty()) {
-            // Беремо перший активний плеєр
             val primaryController = controllers[0]
             val state = primaryController.playbackState?.state
             
-            // Оновлюємо нашу статичну змінну реальним значенням
             isPlaying = (state == PlaybackState.STATE_PLAYING)
             
             Log.d("WallpaperLog", "Сервіс стартонув. Реальний стан плеєра: $isPlaying")
@@ -71,6 +107,9 @@ private var isBitmapLoadedForCurrent: Boolean = false
             isPlaying = false
             Log.d("WallpaperLog", "Активних сесій не знайдено, ставимо pause")
         }
+
+        val filter = IntentFilter("com.example.ACTION_UPDATE_CONFIG")
+        registerReceiver(updateReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
     }
 
     override fun onListenerConnected() {
@@ -87,70 +126,93 @@ private var isBitmapLoadedForCurrent: Boolean = false
         fetchMetadata()
     }
 
-
-
     private fun fetchMetadata() {
-    
-    val sessions = sessionManager?.getActiveSessions(component) ?: return
-    
-    if (sessions.isNullOrEmpty()) {
-        currentController?.unregisterCallback(sessionCallback)
-        currentController = null
-        return
-    }
-    
-    val newController = sessions.find { it.packageName == "com.spotify.music" } ?: sessions.firstOrNull()
+        val sessions = sessionManager?.getActiveSessions(component) ?: return
 
-    // Якщо це той самий контролер, що вже слухаємо — нічого не робимо
-    if (newController?.sessionToken == currentController?.sessionToken) return
+        if (sessions.isNullOrEmpty()) {
+            currentController?.unregisterCallback(sessionCallback)
+            currentController = null
+            return
+        }
+        val prefs = getSharedPreferences("WallpaperSettings", MODE_PRIVATE)
+        allowedPackages = prefs.getStringSet("selected_packages", emptySet()) ?: emptySet()
 
-    // Відписуємося від старого
-    currentController?.unregisterCallback(sessionCallback)
-    
-    // Підписуємося на новий
-    currentController = newController
-    currentController?.let { controller ->
-Log.d("WallpaperLog", "Subscribing to new session: ${controller.packageName}")
-        controller.registerCallback(sessionCallback)
+        val prioritized = sessions
+            .filter { it.packageName in allowedPackages }
+            .sortedByDescending {
+                when (it.playbackState?.state) {
+                    PlaybackState.STATE_PLAYING -> 3
+                    PlaybackState.STATE_BUFFERING -> 2
+                    PlaybackState.STATE_PAUSED -> 1
+                    else -> 0
+                }
+            }
+
+        val newController = prioritized.firstOrNull()
         
-        // Отримуємо поточний стан відтворення
-        controller.metadata?.let { extractBitmap(it) }
+        if (newController == null) {
+            currentController = null
+            isPlaying = false
+        } 
+        else if (currentController == null) {
+            isPlaying = (newController.playbackState?.state == PlaybackState.STATE_PLAYING)
+        }
+
+        if (newController?.sessionToken == currentController?.sessionToken) {
+
+            isPlaying =
+                (newController?.playbackState?.state == PlaybackState.STATE_PLAYING)
+
+            onStateUpdate()
+
+            newController?.metadata?.let {
+                extractBitmap(it)
+            }
+
+            return
+        }
+
+        currentController?.unregisterCallback(sessionCallback)
+        
+        currentController = newController
+        currentController?.let { controller ->
+            controller.registerCallback(sessionCallback)
+            
+            isPlaying = (currentController?.playbackState?.state == PlaybackState.STATE_PLAYING)
+            onStateUpdate()
+            controller.metadata?.let { extractBitmap(it) }
+        }
     }
-}
 
+    private fun extractBitmap(metadata: MediaMetadata) {
+        val title = metadata.getString(MediaMetadata.METADATA_KEY_TITLE)
+        val artist = metadata.getString(MediaMetadata.METADATA_KEY_ARTIST)
+        //if (title != lastTrackTitle || artist != lastTrackArtist) {
+            lastTrackTitle = title
+            lastTrackArtist = artist
+            isBitmapLoadedForCurrent = false
+            Log.d("WallpaperLog", "Зафіксовано новий трек: $title. Чекаємо на арт...")
+        //}
 
-private fun extractBitmap(metadata: MediaMetadata) {
-    val title = metadata.getString(MediaMetadata.METADATA_KEY_TITLE)
-    val artist = metadata.getString(MediaMetadata.METADATA_KEY_ARTIST)
-    if (title != lastTrackTitle || artist != lastTrackArtist) {
-        lastTrackTitle = title
-        lastTrackArtist = artist
-        isBitmapLoadedForCurrent = false
-        Log.d("WallpaperLog", "Зафіксовано новий трек: $title. Чекаємо на арт...")
+        //if (isBitmapLoadedForCurrent) return
+        
+        Log.d("WallpaperLog", "Новий трек: $title. Витягуємо арт...")   
+        val art = metadata.getBitmap(MediaMetadata.METADATA_KEY_ART)
+        val albumArt = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
+        val icon = metadata.getBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON)
+
+        Log.d("WallpaperLog", "Ключі: ART=${art != null}, ALBUM_ART=${albumArt != null}, ICON=${icon != null}")
+
+        val result = art ?: albumArt ?: icon
+
+        if (result != null) {
+            Log.d("WallpaperLog", "Успіх! Бітмап знайдено.")
+            processAndPost(result)
+            isBitmapLoadedForCurrent=true
+        } else {
+            return
+        }
     }
-
-    // Якщо ми вже успішно витягли бітмапу для цього треку — ігноруємо спам
-    if (isBitmapLoadedForCurrent) return
-    
-    Log.d("WallpaperLog", "Новий трек: $title. Витягуємо арт...")   
-    val art = metadata.getBitmap(MediaMetadata.METADATA_KEY_ART)
-    val albumArt = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
-    val icon = metadata.getBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON)
-
-    Log.d("WallpaperLog", "Ключі: ART=${art != null}, ALBUM_ART=${albumArt != null}, ICON=${icon != null}")
-
-    val result = art ?: albumArt ?: icon
-
-    if (result != null) {
-        Log.d("WallpaperLog", "Успіх! Бітмап знайдено.")
-        processAndPost(result)
-        isBitmapLoadedForCurrent=true
-    } else {
-        return
-    }
-}
-
-
 
     private fun processAndPost(source: Bitmap) {
         val hardwareBitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -158,8 +220,12 @@ private fun extractBitmap(metadata: MediaMetadata) {
         } else {
             source
         }
-        Log.d("WallpaperLog", "Bitmap loaded and sent. Callback null? ${onBitmapUpdate == null}")
         latestBitmap = hardwareBitmap
-        onBitmapUpdate?.invoke(hardwareBitmap)
+        onBitmapUpdate(hardwareBitmap)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(updateReceiver)
     }
 }

@@ -1,3 +1,4 @@
 <resources>
+    <string name="app_name">MSLW</string>
     <string name="wallpaper_desc">Music Wallpaper</string>
 </resources>
